@@ -34,7 +34,7 @@ async function getClinics(limit, page) {
             'workTimes',
             'price',
             'rate',
-            'noRates'
+            'noRates',
          ])
          .skip(skip)
          .limit(limit)
@@ -69,6 +69,9 @@ async function searchClinics(searchBy, keyword) {
 async function rateClinic(clinicId, rateValue) {
    try {
       let clinic = await Clinic.findById(clinicId);
+      /* calculate avg rating for clinic = 
+            (number of user rates * previous avg rate + new rate) /  (number of user rates + 1) 
+      */
       let rate = (clinic.noRates * clinic.rate + rateValue) / (clinic.noRates + 1);
       clinic.rate = rate;
       clinic.noRates += 1;

@@ -11,13 +11,22 @@ const userSchema = new mongoose.Schema(
          required: true,
          unique: true,
       },
+      // will be added in v2
+      email: {
+         type: String,
+         unique: true,
+      },
+      age: {
+         type: Number,
+      },
+      // ----
       password: {
          type: String,
          required: true,
       },
       role: {
          type: String,
-         enums: ['CUSTOMER', 'DOCTOR','HELPER', 'ADMIN', 'MODERATOR'],
+         enums: ['CUSTOMER', 'DOCTOR', 'HELPER', 'ADMIN', 'MODERATOR'],
          required: true,
          default: 'CUSTOMER',
       },

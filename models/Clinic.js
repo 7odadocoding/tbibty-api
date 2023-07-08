@@ -53,6 +53,12 @@ const clinicSchema = new mongoose.Schema(
          required: true,
          default: false,
       },
+      // will be added in v2
+      category: {
+         type: String,
+         enum: ['CLINIC', 'LAB', 'XRAY'],
+      },
+      // ----
    },
    { timestamps: true }
 );

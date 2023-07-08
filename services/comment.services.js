@@ -20,6 +20,7 @@ async function getClinicComments(limit, page, clinicId) {
    }
 }
 
+// [TODO:finish after creating comment return comment with user and clinic]
 async function createComment(userId, clinicId, content) {
    try {
       let comment = new Comment({ userId, clinicId, content });
