@@ -6,6 +6,14 @@ const mailingService = new MailingService();
 
 async function signup(fullname, email, password) {
    try {
+      const existantUser = await User.findOne({ email });
+
+      if (existantUser) {
+         const error = new Error('User Already Exists');
+         error.name = 'badRequest';
+         throw error;
+      }
+
       let hashedPassword = await hashPassword(password);
       const newOTP = generateOTP();
       const newOTPExp = 10;
@@ -29,8 +37,6 @@ async function signup(fullname, email, password) {
          newOTPExp,
       };
    } catch (error) {
-      console.log(error);
-      error.name = 'DatabaseError';
       throw error;
    }
 }
@@ -79,6 +85,55 @@ async function verifyEmail(email, otp) {
    }
 }
 
+async function forgetPassword(email) {
+   try {
+      const user = await User.findOne({ email });
+
+      if (!user) return { success: false, message: 'Email not found' };
+
+      const newOTPExp = 10;
+      const newPasswordOTP = generateOTP();
+      user.otp = {
+         value: newPasswordOTP,
+         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         isExpired: false,
+      };
+      mailingService.sendForgotPasswordEmail(email, newPasswordOTP);
+      await user.save();
+
+      return {
+         success: true,
+         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         message: 'An OTP has been successfully sent to your email address.',
+      };
+   } catch (error) {
+      error.name = 'DatabaseError';
+      throw error;
+   }
+}
+
+async function resetPassword(email, otp, newPassword) {
+   try {
+      const user = await User.findOne({ email });
+      if (!user) {
+         const error = new Error('User Not Found');
+         error.name = 'notFound';
+         throw error;
+      }
+      if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
+         user.otp.isExpired = true;
+         user.password = await hashPassword(newPassword);
+         await user.save();
+
+         return { success: true, message: 'Password successfully reseted' };
+      } else {
+         return { success: false, message: 'Invalid OTP or OTP has expired' };
+      }
+   } catch (error) {
+      throw error;
+   }
+}
+
 async function getUserRole(id) {
    try {
       // get user by id an select only role then return role from the document
@@ -88,4 +143,11 @@ async function getUserRole(id) {
       throw error;
    }
 }
-module.exports = { signup, login, verifyEmail, getUserRole };
+module.exports = {
+   signup,
+   login,
+   verifyEmail,
+   forgetPassword,
+   resetPassword,
+   getUserRole,
+};
