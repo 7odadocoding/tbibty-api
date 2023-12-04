@@ -13,12 +13,12 @@ const app = express();
 connectDB();
 
 // app.use(apiLimiter(50)); api limiter doesn't work as intended with helmet
-app.use('/ping', ping);
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({ origin: '*' }));
+app.get('/ping', ping);
 app.use('/api/v1', v1Routes);
 app.all('*', (req, res, next) => {
    let error = new Error('Path not found!');
