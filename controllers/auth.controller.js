@@ -5,6 +5,7 @@ const {
    verifyEmail,
    forgetPassword,
    resetPassword,
+   resendOtp,
 } = require('../services/auth.services');
 const errorResponse = require('../utils/error');
 const successResponse = require('../utils/success');
@@ -51,6 +52,30 @@ const signupController = async (req, res, next) => {
    }
 };
 
+/**
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
+
+const resendOtpController = async (req, res, next) => {
+   const { email } = req.body;
+
+   try {
+      const result = await resendOtp(email);
+      let response;
+      if (result.success) {
+         response = successResponse(result.message, 200);
+         res.status(response.status).json(response);
+      } else {
+         response = errorResponse('badRequest', result.message);
+         res.status(response.statusCode).json(response);
+      }
+   } catch (error) {
+      console.log(error.message);
+      next(error);
+   }
+};
 /**
  * @param {express.Request} req
  * @param {express.Response} res
@@ -128,6 +153,7 @@ module.exports = {
    signupController,
    loginController,
    verifyEmailController,
+   resendOtpController,
    forgetPasswordController,
    resetPasswordController,
 };

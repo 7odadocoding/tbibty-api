@@ -58,6 +58,40 @@ async function login(email, password) {
    }
 }
 
+async function resendOtp(email) {
+   try {
+      const user = await User.findOne({ email });
+
+      if (!user) {
+         return { success: false, message: 'Email not found' };
+      }
+
+      if (user.emailVerified) {
+         return { success: false, message: 'Email is already verified' };
+      }
+
+      const newOTP = generateOTP();
+      const newOTPExp = 10;
+
+      user.otp = {
+         value: newOTP,
+         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         isExpired: false,
+      };
+
+      mailingService.sendVerificationEmail(email, newOTP);
+      await user.save();
+
+      return {
+         success: true,
+         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         message: 'A new OTP has been successfully sent to your email address.',
+      };
+   } catch (error) {
+      throw error;
+   }
+}
+
 async function verifyEmail(email, otp) {
    try {
       const user = await User.findOne({ email });
@@ -147,6 +181,7 @@ module.exports = {
    signup,
    login,
    verifyEmail,
+   resendOtp,
    forgetPassword,
    resetPassword,
    getUserRole,
