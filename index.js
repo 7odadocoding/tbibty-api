@@ -7,6 +7,7 @@ const { port } = require('./configs/env');
 // const apiLimiter = require('./middlewares/apiLimiter');
 const morgan = require('morgan');
 const { default: helmet } = require('helmet');
+const ping = require('./middlewares/ping');
 const app = express();
 
 connectDB();
