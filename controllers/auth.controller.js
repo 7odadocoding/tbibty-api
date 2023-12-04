@@ -1,9 +1,11 @@
 const express = require('express');
-const { login, signup } = require('../services/auth.services');
+const { login, signup, verifyEmail } = require('../services/auth.services');
 const errorResponse = require('../utils/error');
 const successResponse = require('../utils/success');
 const { LOGIN_FAILED, LOGIN_SUCCESS, SIGNUP_SUCCESS } = require('../configs/responses');
 const { createToken } = require('../utils/tokens');
+
+// mailingService.serviceRunning();
 /**
  * @param {express.Request} req
  * @param {express.Response} res
@@ -11,15 +13,13 @@ const { createToken } = require('../utils/tokens');
  */
 const loginController = async (req, res, next) => {
    try {
-      const { username, password } = req.body;
-      let user = await login(username, password);
+      const { email, password } = req.body;
+      let user = await login(email, password);
 
-      // --- if username does not exist or password is wrong
       if (!user) {
          let error = errorResponse('unauthorized', LOGIN_FAILED);
          return res.status(error.statusCode).json(error);
       }
-      // ---
 
       let token = createToken(user, '7d');
       let success = successResponse(LOGIN_SUCCESS, 200, { token });
@@ -36,12 +36,31 @@ const loginController = async (req, res, next) => {
  */
 const signupController = async (req, res, next) => {
    try {
-      let { fullname, username, password } = req.body;
-      let user = await signup(fullname, username, password);
-      let token = createToken(user, '7d');
-      let success = successResponse(SIGNUP_SUCCESS, 200, { token });
+      let { fullname, email, password } = req.body;
+      let user = await signup(fullname, email, password);
+      let success = successResponse(SIGNUP_SUCCESS, 200, user);
       res.status(success.status).json(success);
    } catch (error) {
+      next(error);
+   }
+};
+
+const verifyEmailController = async (req, res, next) => {
+   const { email, otp } = req.body;
+
+   try {
+      const result = await verifyEmail(email, otp);
+
+      let response;
+      if (result.success) {
+         response = successResponse(result.message, 200);
+         res.status(response.status).json(response);
+      } else {
+         response = errorResponse('badRequest', result.message);
+         res.status(response.statusCode).json(response);
+      }
+   } catch (error) {
+      console.log(error);
       next(error);
    }
 };
@@ -49,4 +68,5 @@ const signupController = async (req, res, next) => {
 module.exports = {
    signupController,
    loginController,
+   verifyEmailController,
 };

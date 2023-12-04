@@ -6,12 +6,6 @@ const userSchema = new mongoose.Schema(
          type: String,
          required: true,
       },
-      username: {
-         type: String,
-         required: true,
-         unique: true,
-      },
-      // will be added in v2
       email: {
          type: String,
          unique: true,
@@ -19,7 +13,6 @@ const userSchema = new mongoose.Schema(
       age: {
          type: Number,
       },
-      // ----
       password: {
          type: String,
          required: true,
@@ -30,7 +23,20 @@ const userSchema = new mongoose.Schema(
          required: true,
          default: 'CUSTOMER',
       },
-      isBanned: {
+      otp: {
+         value: String,
+         expiryDate: Date,
+         isExpired: {
+            type: Boolean,
+            default: false,
+         },
+      },
+      emailVerified: {
+         type: Boolean,
+         required: true,
+         default: false,
+      },
+      banned: {
          type: Boolean,
          required: true,
          default: false,

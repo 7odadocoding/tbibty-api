@@ -6,6 +6,7 @@ const connectDB = () => {
       .connect(env.dbUri, {
          useNewUrlParser: true,
          useUnifiedTopology: true,
+         dbName: env.dbName,
       })
       .then((res) => {
          console.info(`connected to ${res.connections[0].name} database successfully ..`);

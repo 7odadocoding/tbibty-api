@@ -12,4 +12,9 @@ async function checkPassword(password, hashedPassword) {
    return isEqual;
 }
 
-module.exports = { hashPassword, checkPassword };
+function generateOTP() {
+   const otp = Math.floor(100000 + Math.random() * 900000);
+   return otp.toString();
+}
+
+module.exports = { hashPassword, checkPassword, generateOTP };

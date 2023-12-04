@@ -4,12 +4,17 @@ const v1Routes = require('./routes/v1.router');
 const errorHandler = require('./middlewares/errorHandler');
 const connectDB = require('./configs/db');
 const { port } = require('./configs/env');
-const apiLimiter = require('./middlewares/apiLimiter');
+// const apiLimiter = require('./middlewares/apiLimiter');
+const morgan = require('morgan');
+const { default: helmet } = require('helmet');
 const app = express();
 
 connectDB();
 
-app.use(apiLimiter(50));
+// app.use(apiLimiter(50)); api limiter doesn't work as intended with helmet
+app.use('/ping', ping);
+app.use(helmet());
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({ origin: '*' }));
