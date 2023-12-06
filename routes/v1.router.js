@@ -1,4 +1,5 @@
 const { API_RUNNING } = require('../configs/responses');
+const areaRouter = require('./area.router');
 const authRouter = require('./auth.router');
 const clinicRouter = require('./clinics.router');
 const commentRouter = require('./comments.router');
@@ -8,6 +9,7 @@ mainRouter.get('/', (req, res) => res.send(API_RUNNING));
 mainRouter.use('/auth', authRouter);
 mainRouter.use('/clinics', clinicRouter);
 mainRouter.use('/comments', commentRouter);
+mainRouter.use('/area', areaRouter);
 
 module.exports = mainRouter;
 
