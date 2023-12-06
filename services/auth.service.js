@@ -69,6 +69,11 @@ class AuthService {
             id: user._id,
             fullname: user.fullname,
             role: user.role,
+            gender: user.gender,
+            city: user.city,
+            governorate: user.governorate,
+            age: user.age,
+            email: user.email,
          };
       } catch (error) {
          this.handleErrors(error);
