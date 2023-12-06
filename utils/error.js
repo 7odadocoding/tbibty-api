@@ -9,6 +9,7 @@ function errorResponse(error = 'internal', message = null) {
       notFound: (message) => boom.notFound(message),
       conflict: (message) => boom.conflict(message),
    };
+   if (!errors[error]) error = 'internal';
    let output = errors[error](message).output;
    return {
       statusCode: output.statusCode,

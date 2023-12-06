@@ -3,7 +3,7 @@ const {
    getCommentById,
    likeComment,
    dislikeComment,
-} = require('../services/comment.services');
+} = require('../services/comment.service');
 const successResponse = require('../utils/success');
 
 const clinicCommentsController = async (req, res, next) => {

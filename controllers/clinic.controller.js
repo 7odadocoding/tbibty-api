@@ -1,5 +1,5 @@
 const express = require('express');
-const { getClinicById, getClinics, searchClinics } = require('../services/clinic.services');
+const { getClinicById, getClinics, searchClinics } = require('../services/clinic.service');
 const successResponse = require('../utils/success');
 const {
    CLINIC_NOT_FOUND,

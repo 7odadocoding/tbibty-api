@@ -18,7 +18,7 @@ const errorHandler = (err, req, res, next) => {
          let error = errorResponse('conflict', 'data conflict error');
          return res.status(error.statusCode).json(error);
       }
-      let error = errorResponse(err.name || 'internal');
+      let error = errorResponse(err.name || 'internal', err.message || 'error occurred');
       return res.status(error.statusCode).json(error);
    }
 };

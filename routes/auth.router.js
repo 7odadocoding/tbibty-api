@@ -1,20 +1,12 @@
-const {
-   loginController,
-   signupController,
-   verifyEmailController,
-   resetPasswordController,
-   forgetPasswordController,
-   resendOtpController,
-} = require('../controllers/auth.controller');
-const { resendOtp } = require('../services/auth.services');
+const authController = require('../controllers/auth.controller');
 
 const userRouter = require('express').Router();
 
-userRouter.post('/login', loginController);
-userRouter.post('/signup', signupController);
-userRouter.put('/verify', verifyEmailController);
-userRouter.post('/verify/resend', resendOtpController);
-userRouter.post('/forget-password', forgetPasswordController);
-userRouter.put('/reset-password', resetPasswordController);
+userRouter.post('/login', authController.login.bind(authController));
+userRouter.post('/signup', authController.signup.bind(authController));
+userRouter.put('/verify', authController.verifyEmail.bind(authController));
+userRouter.post('/verify/resend', authController.resendOtp.bind(authController));
+userRouter.post('/forget-password', authController.forgetPassword.bind(authController));
+userRouter.put('/reset-password', authController.resetPassword.bind(authController));
 
 module.exports = userRouter;
