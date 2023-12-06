@@ -2,6 +2,7 @@ const MailingService = require('../mail/mailingService');
 const User = require('../models/User');
 const { hashPassword, checkPassword, generateOTP } = require('../utils/userUtils');
 
+const OTP_EXPIRY_MINUTES = 10;
 const mailingService = new MailingService();
 
 async function signup(fullname, email, password) {
@@ -37,7 +38,7 @@ async function signup(fullname, email, password) {
          newOTPExp,
       };
    } catch (error) {
-      throw error;
+      handleErrors(error);
    }
 }
 async function login(email, password) {
@@ -53,8 +54,7 @@ async function login(email, password) {
          role: user.role,
       };
    } catch (error) {
-      error.name = 'DatabaseError';
-      throw error;
+      handleErrors(error);
    }
 }
 
@@ -71,11 +71,10 @@ async function resendOtp(email) {
       }
 
       const newOTP = generateOTP();
-      const newOTPExp = 10;
 
       user.otp = {
          value: newOTP,
-         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         expiryDate: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
          isExpired: false,
       };
 
@@ -84,11 +83,11 @@ async function resendOtp(email) {
 
       return {
          success: true,
-         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         expiryDate: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
          message: 'A new OTP has been successfully sent to your email address.',
       };
    } catch (error) {
-      throw error;
+      handleErrors(error);
    }
 }
 
@@ -103,8 +102,6 @@ async function verifyEmail(email, otp) {
 
       if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
          user.otp.isExpired = true;
-         await user.save();
-
          user.emailVerified = true;
          await user.save();
 
@@ -113,9 +110,7 @@ async function verifyEmail(email, otp) {
          return { success: false, message: 'Invalid OTP or OTP has expired' };
       }
    } catch (error) {
-      console.error('Error verifying email:', error);
-      error.name = 'DatabaseError';
-      throw new Error('Internal server error');
+      handleErrors(error);
    }
 }
 
@@ -125,11 +120,10 @@ async function forgetPassword(email) {
 
       if (!user) return { success: false, message: 'Email not found' };
 
-      const newOTPExp = 10;
       const newPasswordOTP = generateOTP();
       user.otp = {
          value: newPasswordOTP,
-         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         expiryDate: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
          isExpired: false,
       };
       mailingService.sendForgotPasswordEmail(email, newPasswordOTP);
@@ -137,12 +131,11 @@ async function forgetPassword(email) {
 
       return {
          success: true,
-         expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
+         expiryDate: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
          message: 'An OTP has been successfully sent to your email address.',
       };
    } catch (error) {
-      error.name = 'DatabaseError';
-      throw error;
+      handleErrors(error);
    }
 }
 
@@ -164,7 +157,7 @@ async function resetPassword(email, otp, newPassword) {
          return { success: false, message: 'Invalid OTP or OTP has expired' };
       }
    } catch (error) {
-      throw error;
+      handleErrors(error);
    }
 }
 
@@ -173,10 +166,16 @@ async function getUserRole(id) {
       // get user by id an select only role then return role from the document
       return (await User.findById(id).select('role')).role;
    } catch (error) {
-      error.name = 'DatabaseError';
-      throw error;
+      handleErrors(error);
    }
 }
+
+function handleErrors(error, defaultName = 'DatabaseError') {
+   console.error('Error:', error);
+   error.name = error.name || defaultName;
+   throw error
+}
+
 module.exports = {
    signup,
    login,

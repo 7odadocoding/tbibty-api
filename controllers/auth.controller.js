@@ -63,12 +63,12 @@ const resendOtpController = async (req, res, next) => {
 
    try {
       const result = await resendOtp(email);
-      let response;
+
       if (result.success) {
-         response = successResponse(result.message, 200);
+         let response = successResponse(result.message, 200);
          res.status(response.status).json(response);
       } else {
-         response = errorResponse('badRequest', result.message);
+         let response = errorResponse('badRequest', result.message);
          res.status(response.statusCode).json(response);
       }
    } catch (error) {
@@ -87,12 +87,11 @@ const verifyEmailController = async (req, res, next) => {
    try {
       const result = await verifyEmail(email, otp);
 
-      let response;
       if (result.success) {
-         response = successResponse(result.message, 200);
+         let response = successResponse(result.message, 200);
          res.status(response.status).json(response);
       } else {
-         response = errorResponse('badRequest', result.message);
+         let response = errorResponse('badRequest', result.message);
          res.status(response.statusCode).json(response);
       }
    } catch (error) {
@@ -111,12 +110,11 @@ const forgetPasswordController = async (req, res, next) => {
 
    try {
       const result = await forgetPassword(email);
-      let response;
       if (result.success) {
-         response = successResponse(result.message, 200);
+         let response = successResponse(result.message, 200);
          res.status(response.status).json(response);
       } else {
-         response = errorResponse('badRequest', result.message);
+         let response = errorResponse('badRequest', result.message);
          res.status(response.statusCode).json(response);
       }
    } catch (error) {
@@ -135,12 +133,12 @@ const resetPasswordController = async (req, res, next) => {
 
    try {
       const result = await resetPassword(email, otp, newPassword);
-      let response;
+
       if (result.success) {
-         response = successResponse(result.message, 204);
+         let response = successResponse(result.message, 200);
          res.status(response.status).json(response);
       } else {
-         response = errorResponse('badRequest', result.message);
+         let response = errorResponse('badRequest', result.message);
          res.status(response.statusCode).json(response);
       }
    } catch (error) {
