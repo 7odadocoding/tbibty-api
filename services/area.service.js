@@ -1,61 +1,66 @@
-const path = require('path');
 const fs = require('fs');
-const rootDir = process.cwd();
+const path = require('path');
+const Governorate = require('../models/Governorate');
+const City = require('../models/City');
 
 class AreaService {
    constructor() {
-      this.cities = JSON.parse(
-         fs.readFileSync(path.join(rootDir, '/data/cities.json'), 'utf-8')
-      );
-      this.governorates = JSON.parse(
-         fs.readFileSync(path.join(rootDir, '/data/governorates.json'), 'utf-8')
-      );
       this.allowedLangs = ['en', 'ar'];
    }
-   getGovernorates(lang = 'ar') {
+
+   validateLang(lang) {
+      if (!this.allowedLangs.includes(lang)) {
+         const error = new Error(
+            `lang should be in ${JSON.stringify(this.allowedLangs)}`
+         );
+         error.name = 'badRequest';
+         throw error;
+      }
+   }
+
+   async getGovernorates(lang = 'ar') {
       try {
-         if (!this.allowedLangs.includes(lang)) {
-            const error = new Error(
-               `lang should be in ${JSON.stringify(this.allowedLangs)}`
-            );
-            error.name = 'badRequest';
-            throw error;
-         }
-         return this.governorates.map((governorate) => {
-            return {
-               id: governorate.id,
-               name: governorate[`governorate_name_${lang}`],
-            };
-         });
+         this.validateLang(lang);
+         const governorates = await Governorate.find()
+            .sort({ id: 1 })
+            .select(`-_id id governorate_name_${lang}`)
+            .lean()
+            .exec();
+         return governorates;
       } catch (error) {
-         console.log(error);
          this.handleError(error);
       }
    }
 
-   getGovernorateCities(governorateId = '1', lang = 'ar') {
+   async getGovernorateCities(governorateId = '1', lang = 'ar') {
       try {
-         if (!this.allowedLangs.includes(lang)) {
-            const error = new Error(
-               `lang should be in ${JSON.stringify(this.allowedLangs)}`
-            );
-            error.name = 'badRequest';
-            throw error;
-         }
-         const cities = this.cities.filter((city) => city.governorate_id == governorateId);
+         this.validateLang(lang);
+         const cities = await City.find({ governorate_id: governorateId })
+            .select(`-_id governorate_id city_name_${lang}`)
+            .lean()
+            .exec();
          if (!cities.length) {
             const error = new Error(
-               `No cities with requested governorateId:${governorateId}`
+               `No cities with requested governorateId: ${governorateId}`
             );
             error.name = 'badRequest';
             throw error;
          }
-         return cities.map((city) => {
-            return {
-               id: city.id,
-               name: city[`city_name_${lang}`],
-            };
-         });
+         return cities;
+      } catch (error) {
+         this.handleError(error);
+      }
+   }
+
+   async fillDatabaseFromJson(filePath) {
+      try {
+         const data = fs.readFileSync(path.resolve(__dirname, filePath));
+         const json = JSON.parse(data);
+         if (json[0].id) {
+            await Governorate.create(json);
+         } else {
+            await City.create(json);
+         }
       } catch (error) {
          this.handleError(error);
       }

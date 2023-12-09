@@ -33,8 +33,6 @@ async function getClinics(limit, page) {
             'locationUrl',
             'workTimes',
             'price',
-            'rate',
-            'noRates',
          ])
          .skip(skip)
          .limit(limit)
@@ -47,39 +45,23 @@ async function getClinics(limit, page) {
    }
 }
 
+const validSearchFields = ['doctorName', 'specialization', 'address'];
+
 async function searchClinics(searchBy, keyword) {
    try {
-      let searchByList = ['doctorName', 'specialization', 'address'];
-      if (!searchByList.includes(searchBy)) {
-         let error = new Error('Invalid search field');
-         error.name = 'ValidationError';
-         throw error;
+      if (!validSearchFields.includes(searchBy)) {
+         throw new Error('Invalid search field');
       }
-      let searchQuery = {
-         [searchBy]: keyword,
+
+      const searchQuery = {
+         [searchBy]: { $regex: new RegExp(keyword, 'i') }, // Case-insensitive search
       };
-      let searchResult = await Clinic.find(searchQuery);
+
+      const searchResult = await Clinic.find(searchQuery).exec();
       return searchResult;
    } catch (error) {
-      error.name = 'DatabaseError';
-      throw error;
-   }
-}
-
-async function rateClinic(clinicId, rateValue) {
-   try {
-      let clinic = await Clinic.findById(clinicId);
-      /* calculate avg rating for clinic = 
-            (number of user rates * previous avg rate + new rate) /  (number of user rates + 1) 
-      */
-      let rate = (clinic.noRates * clinic.rate + rateValue) / (clinic.noRates + 1);
-      clinic.rate = rate;
-      clinic.noRates += 1;
-      await clinic.save();
-      return rate;
-   } catch (error) {
-      error.name = 'DatabaseError';
-      throw error;
+      console.error('Error in searchClinics:', error.message);
+      throw new Error('Failed to perform clinic search');
    }
 }
 
@@ -118,4 +100,4 @@ async function removeClinic(id) {
    }
 }
 
-module.exports = { getClinicById, getClinics, searchClinics, rateClinic };
+module.exports = { getClinicById, getClinics, searchClinics };

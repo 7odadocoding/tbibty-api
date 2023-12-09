@@ -6,10 +6,10 @@ class AreaController {
       this.service = new AreaService();
    }
 
-   getGovernorates(req, res, next) {
+   async getGovernorates(req, res, next) {
       try {
          const { lang } = req.query;
-         const governorates = this.service.getGovernorates(lang);
+         const governorates = await this.service.getGovernorates(lang);
          const response = successResponse(
             'governorates fetched successfully',
             200,
@@ -21,11 +21,18 @@ class AreaController {
          next(error);
       }
    }
-   getGovernorateCities(req, res, next) {
+   async getGovernorateCities(req, res, next) {
       try {
          const { governorateId, lang } = req.query;
-         const cities = this.service.getGovernorateCities(governorateId, lang);
-         const response = successResponse('cities fetched successfully', 200, cities);
+         const cities = await this.service.getGovernorateCities(
+            governorateId,
+            lang
+         );
+         const response = successResponse(
+            'cities fetched successfully',
+            200,
+            cities
+         );
          res.status(response.status).json(response);
       } catch (error) {
          next(error);

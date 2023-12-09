@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { checkPassword, hashPassword } = require('../utils/userUtils');
 const { String, Boolean } = mongoose.Schema.Types;
 const userSchema = new mongoose.Schema(
    {
@@ -60,6 +61,23 @@ const userSchema = new mongoose.Schema(
    },
    { timestamps: true }
 );
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+   try {
+      return await checkPassword(candidatePassword, this.password);
+   } catch (error) {
+      throw error;
+   }
+};
+
+userSchema.methods.setPassword = async function (newPassword) {
+   try {
+      this.password = await hashPassword(newPassword);
+      await this.save();
+   } catch (error) {
+      throw error;
+   }
+};
 
 const User = mongoose.model('user', userSchema);
 

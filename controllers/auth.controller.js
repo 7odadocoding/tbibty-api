@@ -19,7 +19,7 @@ class AuthController {
             return res.status(error.statusCode).json(error);
          }
 
-         let token = createToken({ id: user.id, role: user.role }, '7d');
+         let token = createToken({ userId: user.id, role: user.role }, '7d');
          let success = successResponse(LOGIN_SUCCESS, 200, {
             token,
             id: user.id,
