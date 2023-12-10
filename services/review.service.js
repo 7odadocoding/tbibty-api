@@ -37,12 +37,13 @@ class ReviewService {
       try {
          const offset = (page - 1) * limit;
          const clinicReviews = await this.ReviewModel.find({ clinicId })
-            .select('comment, rating, helpfulCount, notHelpfulCount')
+            .select('comment rating helpfulCount notHelpfulCount')
             .skip(offset)
             .limit(limit)
             .populate({ path: 'userId', select: '_id fullname' })
             .lean();
 
+         console.log(clinicReviews , clinicId);
          return clinicReviews;
       } catch (error) {
          console.error('Error in getReviewsForClinic:', error.message);
@@ -53,7 +54,7 @@ class ReviewService {
    async getReviewsForUser(userId) {
       try {
          const userReviews = await this.ReviewModel.find({ userId })
-            .select('comment, rating, helpfulCount, notHelpfulCount')
+            .select('comment rating helpfulCount notHelpfulCount')
             .populate({ path: 'clinicId', select: '_id name' })
             .lean();
          return userReviews;

@@ -1,6 +1,5 @@
 node_modules
 .env
-# /data
+/data
 /scripts
 todos.txt
-idToNum.js

@@ -1,13 +1,13 @@
 const connectDB = require('../configs/db');
-const AreaService = require('../services/area.service');
+const Clinic = require('../models/Clinic');
+const fs = require('fs');
 
-connectDB();
-
-const areaService = new AreaService();
+const dummyClinics = JSON.parse(fs.readFileSync('./data/clinics.json', 'utf-8'));
 
 async function seed() {
-   await areaService.fillDatabaseFromJson('../data/governorates.json');
-   await areaService.fillDatabaseFromJson('../data/cities.json');
+   connectDB();
+   const newClinics = await Clinic.create(dummyClinics);
+   console.log(newClinics);
 }
 
 seed().then(() => {

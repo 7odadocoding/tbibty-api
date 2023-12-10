@@ -21,7 +21,8 @@ class ReviewController {
 
    async getReviewsForClinic(req, res, next) {
       try {
-         const { clinicId, page, limit } = req.query;
+         const { page, limit } = req.query;
+         const { clinicId } = req.params;
          const reviews = await this.service.getReviewsForClinic(clinicId, page, limit);
          const response = successResponse('Reviews fetched successfully', 200, reviews);
          res.status(response.status).json(response);
@@ -33,7 +34,7 @@ class ReviewController {
 
    async getReviewsForUser(req, res, next) {
       try {
-         const { userId } = req.query;
+         const { userId } = req.user;
          const reviews = await this.service.getReviewsForUser(userId);
          const response = successResponse('Reviews fetched successfully', 200, reviews);
          res.status(response.status).json(response);

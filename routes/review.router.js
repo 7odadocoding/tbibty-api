@@ -2,7 +2,7 @@ const reviewRouter = require('express').Router();
 const reviewController = require('../controllers/review.controller');
 const authenticate = require('../middlewares/authentication');
 
-reviewRouter.get('/clinic', reviewController.getReviewsForClinic.bind(reviewController));
+reviewRouter.get('/clinic/:clinicId', reviewController.getReviewsForClinic.bind(reviewController));
 reviewRouter.get('/user', authenticate(true), reviewController.getReviewsForUser.bind(reviewController));
 reviewRouter.post('/create', authenticate(true), reviewController.createReview.bind(reviewController));
 reviewRouter.put('/:reviewId/helpful', authenticate(true), reviewController.markAsHelpful.bind(reviewController));

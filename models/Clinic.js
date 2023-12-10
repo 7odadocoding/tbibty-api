@@ -74,6 +74,6 @@ clinicSchema.virtual('reviewsCount').get(function () {
 clinicSchema.set('toObject', { virtuals: true });
 clinicSchema.set('toJSON', { virtuals: true });
 
-const Clinic = mongoose.model('clinic', clinicSchema);
+const Clinic = mongoose.model('Clinic', clinicSchema);
 
 module.exports = Clinic;
