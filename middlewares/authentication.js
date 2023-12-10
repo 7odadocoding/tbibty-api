@@ -10,32 +10,24 @@ const authenticate = (verified = false) => {
          return res.status(error.statusCode).json(error);
       }
 
-      const user = checkToken(token);
-      if (!user) {
-         let error = errorResponse('unauthorized', 'invalid token');
-         return res.status(error.statusCode).json(error);
-      }
-
       try {
-         const existingUser = await userService
-            .getUserById(user.userId)
-            .catch((err) => {
-               return false;
-            });
+         const user = checkToken(token);
+         if (!user) {
+            let error = errorResponse('unauthorized', 'invalid token');
+            return res.status(error.statusCode).json(error);
+         }
+         const existingUser = await userService.getUserById(user.userId).catch((err) => {
+            return false;
+         });
          if (!existingUser) {
             let error = errorResponse('unauthorized', 'user not found');
             return res.status(error.statusCode).json(error);
          }
          console.log('here');
          if (verified) {
-            const isEmailVerified = await userService.checkEmailVerification(
-               user.userId
-            );
+            const isEmailVerified = await userService.checkEmailVerification(user.userId);
             if (!isEmailVerified) {
-               let error = errorResponse(
-                  'unauthorized',
-                  'you should verify your email first'
-               );
+               let error = errorResponse('unauthorized', 'you should verify your email first');
                return res.status(error.statusCode).json(error);
             }
          }
@@ -43,7 +35,7 @@ const authenticate = (verified = false) => {
          req.user = user;
          next();
       } catch (err) {
-         console.log(err);
+         console.log('Error: ' + err.message);
          let error = errorResponse('unauthorized', 'invalid token');
          return res.status(error.statusCode).json(error);
       }

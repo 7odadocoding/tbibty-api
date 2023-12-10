@@ -12,7 +12,8 @@ function createToken(payload, exp) {
 function checkToken(token) {
    try {
       if (!token) throw new Error('token is required');
-      return jwt.verify(token, jwtSecret);
+      const user = jwt.verify(token, jwtSecret);
+      return user;
    } catch (error) {
       throw error;
    }
