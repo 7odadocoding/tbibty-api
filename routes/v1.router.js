@@ -3,6 +3,7 @@ const areaRouter = require('./area.router');
 const authRouter = require('./auth.router');
 const clinicRouter = require('./clinics.router');
 const homeRouter = require('./home.router');
+const reviewRouter = require('./review.router');
 const userRouter = require('./user.router');
 const mainRouter = require('express').Router();
 
@@ -12,5 +13,6 @@ mainRouter.use('/clinics', clinicRouter);
 mainRouter.use('/area', areaRouter);
 mainRouter.use('/user', userRouter);
 mainRouter.use('/home', homeRouter);
+mainRouter.use('/reviews', reviewRouter);
 
 module.exports = mainRouter;
