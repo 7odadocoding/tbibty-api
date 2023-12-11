@@ -1,5 +1,5 @@
+const mongoose = require('mongoose');
 const Review = require('../models/Review');
-
 class ReviewService {
    constructor(ReviewModel) {
       this.ReviewModel = ReviewModel;
@@ -33,18 +33,41 @@ class ReviewService {
       }
    }
 
-   async getReviewsForClinic(clinicId, page = 1, limit = 40) {
+   async getReviewsForClinic(clinicId, userId, page = 1, limit = 40) {
       try {
          const offset = (page - 1) * limit;
-         const clinicReviews = await this.ReviewModel.find({ clinicId })
-            .select('comment rating helpfulCount notHelpfulCount')
-            .skip(offset)
-            .limit(limit)
-            .populate({ path: 'userId', select: '_id fullname' })
-            .lean();
+         console.log(userId);
 
-         console.log(clinicReviews , clinicId);
-         return clinicReviews;
+         const aggregationPipeline = [
+            { $match: { clinicId: new mongoose.Types.ObjectId(clinicId) } },
+            {
+               $project: {
+                  comment: 1,
+                  rating: 1,
+                  reported: 1,
+                  helpfulCount: { $size: '$helpful' },
+                  notHelpfulCount: { $size: '$notHelpful' },
+                  isHelpful: userId ? { $in: [new mongoose.Types.ObjectId(userId), '$helpful'] } : null,
+                  isNotHelpful: userId ? { $in: [new mongoose.Types.ObjectId(userId), '$notHelpful'] } : null,
+               },
+            },
+            { $skip: offset },
+            { $limit: limit },
+         ];
+
+         if (userId) {
+            aggregationPipeline.push({
+               $group: {
+                  _id: null,
+                  total: { $sum: 1 },
+                  results: { $push: '$$ROOT' },
+               },
+            });
+         }
+
+         const clinicReviews = await this.ReviewModel.aggregate(aggregationPipeline);
+
+         return userId ? clinicReviews[0].results : clinicReviews;
       } catch (error) {
          console.error('Error in getReviewsForClinic:', error.message);
          throw error;
@@ -53,10 +76,33 @@ class ReviewService {
 
    async getReviewsForUser(userId) {
       try {
-         const userReviews = await this.ReviewModel.find({ userId })
-            .select('comment rating helpfulCount notHelpfulCount')
-            .populate({ path: 'clinicId', select: '_id name' })
-            .lean();
+         const userReviews = await this.ReviewModel.aggregate([
+            { $match: { userId: new mongoose.Types.ObjectId(userId), clinicId: { $exists: true, $ne: null } } },
+            {
+               $lookup: {
+                  from: 'clinics',
+                  localField: 'clinicId',
+                  foreignField: '_id',
+                  as: 'clinic',
+               },
+            },
+            { $unwind: '$clinic' },
+            {
+               $project: {
+                  clinicId: '$clinic._id',
+                  clinicDoctor: '$clinic.doctorName',
+                  clinicCategoryr: '$clinic.category',
+                  comment: 1,
+                  rating: 1,
+                  reported: 1,
+                  helpfulCount: { $size: '$helpful' },
+                  notHelpfulCount: { $size: '$notHelpful' },
+                  isHelpful: { $in: [new mongoose.Types.ObjectId(userId), '$helpful'] },
+                  isNotHelpful: { $in: [new mongoose.Types.ObjectId(userId), '$notHelpful'] },
+               },
+            },
+         ]);
+
          return userReviews;
       } catch (error) {
          console.error('Error in getReviewsForUser:', error.message);
@@ -74,7 +120,7 @@ class ReviewService {
             throw error;
          }
 
-         if (review.userId !== userId) {
+         if (review.userId.toString() !== userId) {
             const error = new Error('You are not the owner of this review');
             error.name = 'unauthorized';
             throw error;
@@ -90,6 +136,7 @@ class ReviewService {
          throw error;
       }
    }
+
    async updateReview(reviewId, userId, rating = null, comment = null) {
       try {
          const review = await this.ReviewModel.findById(reviewId);
@@ -100,7 +147,7 @@ class ReviewService {
             throw error;
          }
 
-         if (review.userId !== userId) {
+         if (review.userId.toString() !== userId) {
             const error = new Error('You are not the owner of this review');
             error.name = 'unauthorized';
             throw error;
@@ -129,7 +176,7 @@ class ReviewService {
       }
    }
 
-   async markAsHelpful(reviewId) {
+   async markAsHelpful(reviewId, userId) {
       try {
          const review = await this.ReviewModel.findById(reviewId);
          if (!review) {
@@ -137,7 +184,22 @@ class ReviewService {
             error.name = 'notFound';
             throw error;
          }
-         review.helpfulCount++;
+
+         const helpfulUserIndex = review.helpful.indexOf(userId);
+         const notHelpfulUserIndex = review.notHelpful.indexOf(userId);
+
+         // Remove user from 'notHelpful' list if present
+         if (notHelpfulUserIndex !== -1) {
+            review.notHelpful.splice(notHelpfulUserIndex, 1);
+         }
+
+         // Add or remove user from 'helpful' list based on previous state
+         if (helpfulUserIndex !== -1) {
+            review.helpful.splice(helpfulUserIndex, 1);
+         } else {
+            review.helpful.push(userId);
+         }
+
          await review.save();
          return review;
       } catch (error) {
@@ -146,7 +208,7 @@ class ReviewService {
       }
    }
 
-   async markAsNotHelpful(reviewId) {
+   async markAsNotHelpful(reviewId, userId) {
       try {
          const review = await this.ReviewModel.findById(reviewId);
          if (!review) {
@@ -154,7 +216,22 @@ class ReviewService {
             error.name = 'notFound';
             throw error;
          }
-         review.notHelpfulCount++;
+
+         const helpfulUserIndex = review.helpful.indexOf(userId);
+         const notHelpfulUserIndex = review.notHelpful.indexOf(userId);
+
+         // Remove user from 'helpful' list if present
+         if (helpfulUserIndex !== -1) {
+            review.helpful.splice(helpfulUserIndex, 1);
+         }
+
+         // Add or remove user from 'notHelpful' list based on previous state
+         if (notHelpfulUserIndex !== -1) {
+            review.notHelpful.splice(notHelpfulUserIndex, 1);
+         } else {
+            review.notHelpful.push(userId);
+         }
+
          await review.save();
          return review;
       } catch (error) {
@@ -171,7 +248,7 @@ class ReviewService {
             error.name = 'notFound';
             throw error;
          }
-         review.reportCount++;
+         review.reported = true;
          await review.save();
          return review;
       } catch (error) {

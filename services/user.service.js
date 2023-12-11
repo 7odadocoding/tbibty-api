@@ -8,6 +8,11 @@ class UserService {
    async checkEmailVerification(id) {
       try {
          const user = await this.UserModel.findById(id).select('emailVerified');
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
          return user ? user.emailVerified : false;
       } catch (error) {
          throw error;
@@ -21,7 +26,9 @@ class UserService {
          );
 
          if (!user) {
-            throw new Error('User not found');
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
          }
 
          return user.toObject();
@@ -36,7 +43,9 @@ class UserService {
             '-password -role -emailVerified -banned -otp -updatedAt -__v -email'
          );
          if (!user) {
-            throw new Error('User not found');
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
          }
 
          return user;
@@ -54,7 +63,9 @@ class UserService {
          );
 
          if (!updatedUser) {
-            throw new Error('User not found');
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
          }
 
          return updatedUser.fullname;

@@ -23,14 +23,8 @@ const reviewSchema = new mongoose.Schema(
          trim: true,
          maxlength: 1000,
       },
-      helpfulCount: {
-         type: Number,
-         default: 0,
-      },
-      notHelpfulCount: {
-         type: Number,
-         default: 0,
-      },
+      helpful: [mongoose.Schema.Types.ObjectId],
+      notHelpful: [mongoose.Schema.Types.ObjectId],
       reported: {
          type: Boolean,
          default: false,

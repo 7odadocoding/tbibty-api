@@ -23,7 +23,8 @@ class ReviewController {
       try {
          const { page, limit } = req.query;
          const { clinicId } = req.params;
-         const reviews = await this.service.getReviewsForClinic(clinicId, page, limit);
+         const userId = req.user?.userId || null;
+         const reviews = await this.service.getReviewsForClinic(clinicId, userId, page, limit);
          const response = successResponse('Reviews fetched successfully', 200, reviews);
          res.status(response.status).json(response);
       } catch (error) {
@@ -73,7 +74,8 @@ class ReviewController {
    async markAsHelpful(req, res, next) {
       try {
          const { reviewId } = req.params;
-         const review = await this.service.markAsHelpful(reviewId);
+         const { userId } = req.user;
+         const review = await this.service.markAsHelpful(reviewId, userId);
          const response = successResponse('Marked as helpful successfully', 200, review);
          res.status(response.status).json(response);
       } catch (error) {
@@ -85,7 +87,8 @@ class ReviewController {
    async markAsNotHelpful(req, res, next) {
       try {
          const { reviewId } = req.params;
-         const review = await this.service.markAsNotHelpful(reviewId);
+         const { userId } = req.user;
+         const review = await this.service.markAsNotHelpful(reviewId, userId);
          const response = successResponse('Marked as not helpful successfully', 200, review);
          res.status(response.status).json(response);
       } catch (error) {

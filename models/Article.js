@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const articleSchema = new mongoose.Schema({
-   title: {
+   articleTitle: {
       type: String,
       required: true,
    },
@@ -9,10 +9,10 @@ const articleSchema = new mongoose.Schema({
       type: String,
       required: true,
    },
-   contentSections: {
+   main: {
       sections: [
          {
-            title: {
+            sectionTitle: {
                type: String,
                required: true,
             },
@@ -22,14 +22,11 @@ const articleSchema = new mongoose.Schema({
          },
       ],
    },
-   authors: [
-      {
-         name: {
-            type: String,
-            required: true,
-         },
-      },
-   ],
+   author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Doctor',
+      required: true,
+   },
    keywords: [
       {
          type: String,
@@ -43,23 +40,8 @@ const articleSchema = new mongoose.Schema({
       type: Number,
       default: 0,
    },
-   helpfulCount: {
-      type: Number,
-      default: 0,
-   },
-   notHelpfulCount: {
-      type: Number,
-      default: 0,
-   },
-});
-
-articleSchema.virtual('helpfulness').get(function () {
-   const totalVotes = this.helpfulCount + this.notHelpfulCount;
-   if (totalVotes === 0) {
-      return 0;
-   }
-   const helpfulPercentage = (this.helpfulCount / totalVotes) * 100;
-   return Math.round(helpfulPercentage);
+   helpful: [mongoose.Schema.Types.ObjectId],
+   notHelpful: [mongoose.Schema.Types.ObjectId],
 });
 
 const Article = mongoose.model('Article', articleSchema);
