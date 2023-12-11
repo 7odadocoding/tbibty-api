@@ -50,7 +50,7 @@ class AuthService {
             newOTPExp,
          };
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -58,7 +58,11 @@ class AuthService {
       try {
          const user = await this.UserModel.findOne({ email });
 
-         if (!user) return false;
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
 
          const hashedPassword = user.password;
          const isEqual = await this.checkPassword(password, hashedPassword);
@@ -76,7 +80,7 @@ class AuthService {
             email: user.email,
          };
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -85,7 +89,9 @@ class AuthService {
          const user = await this.UserModel.findOne({ email });
 
          if (!user) {
-            return { success: false, message: 'Email not found' };
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
          }
 
          if (user.emailVerified) {
@@ -109,7 +115,7 @@ class AuthService {
             message: 'A new OTP has been successfully sent to your email address.',
          };
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -120,6 +126,11 @@ class AuthService {
          if (!user) {
             const error = new Error('User not found');
             error.name = 'notFound';
+            throw error;
+         }
+         if (!user.emailVerified) {
+            const error = new Error('Email should be verified');
+            error.name = 'badRequest';
             throw error;
          }
 
@@ -133,7 +144,7 @@ class AuthService {
             return { success: false, message: 'Invalid OTP or OTP has expired' };
          }
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -141,7 +152,11 @@ class AuthService {
       try {
          const user = await this.UserModel.findOne({ email });
 
-         if (!user) return { success: false, message: 'Email not found' };
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
 
          const newPasswordOTP = this.generateOTP();
          user.otp = {
@@ -159,7 +174,7 @@ class AuthService {
             message: 'An OTP has been successfully sent to your email address.',
          };
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -183,7 +198,7 @@ class AuthService {
             return { success: false, message: 'Invalid OTP or OTP has expired' };
          }
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
    }
 
@@ -192,14 +207,8 @@ class AuthService {
          // get user by id and select only role then return role from the document
          return (await this.UserModel.findById(id).select('role')).role;
       } catch (error) {
-         this.handleErrors(error);
+         throw error;
       }
-   }
-
-   handleErrors(error, defaultName = 'DatabaseError') {
-      console.error('Error:', error);
-      error.name = error.name || defaultName;
-      throw error;
    }
 }
 
