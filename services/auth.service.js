@@ -188,6 +188,12 @@ class AuthService {
             throw error;
          }
 
+         if (!user.emailVerified) {
+            const error = new Error('Email should be verified');
+            error.name = 'badRequest';
+            throw error;
+         }
+
          if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
             user.otp.isExpired = true;
             user.password = await this.hashPassword(newPassword);
