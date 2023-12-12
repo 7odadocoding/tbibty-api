@@ -78,6 +78,7 @@ class UserService {
          const user = await this.UserModel.findById(userId).populate({
             path: 'saves',
             select: 'articleTitle author',
+            populate: { path: 'author', select: 'doctorName' },
          });
 
          if (!user) {

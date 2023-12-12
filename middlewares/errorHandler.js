@@ -2,7 +2,7 @@ const errorResponse = require('../utils/error');
 
 const errorHandler = (err, req, res, next) => {
    if (err) {
-      console.log(err.name);
+      console.log('Error:' , err);
       if (err.name === 'ValidationError') {
          let error = errorResponse('conflict', err.message);
          return res.status(error.statusCode).json(error);
