@@ -1,5 +1,6 @@
 const { API_RUNNING } = require('../configs/responses');
 const areaRouter = require('./area.router');
+const articleRouter = require('./article.router');
 const authRouter = require('./auth.router');
 const clinicRouter = require('./clinics.router');
 const homeRouter = require('./home.router');
@@ -14,5 +15,6 @@ mainRouter.use('/area', areaRouter);
 mainRouter.use('/user', userRouter);
 mainRouter.use('/home', homeRouter);
 mainRouter.use('/reviews', reviewRouter);
+mainRouter.use('/articles', articleRouter);
 
 module.exports = mainRouter;
