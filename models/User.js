@@ -58,6 +58,18 @@ const userSchema = new mongoose.Schema(
          required: true,
          default: false,
       },
+      favorites: [
+         {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Clinic',
+         },
+      ],
+      saves: [
+         {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Article',
+         },
+      ],
    },
    { timestamps: true }
 );

@@ -5,6 +5,10 @@ const articleSchema = new mongoose.Schema({
       type: String,
       required: true,
    },
+   thumbnail: {
+      type: String,
+      default: 'N/A',
+   },
    abstract: {
       type: String,
       required: true,
@@ -24,7 +28,7 @@ const articleSchema = new mongoose.Schema({
    },
    author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Doctor',
+      ref: 'Clinic',
       required: true,
    },
    keywords: [

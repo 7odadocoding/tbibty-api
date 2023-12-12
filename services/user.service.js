@@ -54,6 +54,93 @@ class UserService {
       }
    }
 
+   async getUserFavorites(userId) {
+      try {
+         const user = await this.UserModel.findById(userId).populate({
+            path: 'favorites',
+            select: 'doctorName specialization rating',
+         });
+
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
+
+         return user.favorites;
+      } catch (error) {
+         throw error;
+      }
+   }
+
+   async getUserSaves(userId) {
+      try {
+         const user = await this.UserModel.findById(userId).populate({
+            path: 'saves',
+            select: 'articleTitle author',
+         });
+
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
+
+         return user.saves;
+      } catch (error) {
+         throw error;
+      }
+   }
+
+   async addToFavorites(userId, clinicId) {
+      try {
+         const user = await this.UserModel.findById(userId);
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
+
+         const index = user.favorites.indexOf(clinicId);
+         if (index === -1) {
+            user.favorites.push(clinicId);
+            await user.save();
+            return 'Clinic added to favorites successfully';
+         } else {
+            user.favorites.splice(index, 1);
+            s;
+            await user.save();
+            return 'Clinic removed from favorites successfully';
+         }
+      } catch (error) {
+         throw error;
+      }
+   }
+
+   async saveArticle(userId, articleId) {
+      try {
+         const user = await this.UserModel.findById(userId);
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
+
+         const index = user.saves.indexOf(articleId);
+         if (index === -1) {
+            user.saves.push(articleId);
+            await user.save();
+            return 'Article saved successfully';
+         } else {
+            user.saves.splice(index, 1); // Remove if already exists
+            await user.save();
+            return 'Article unsaved successfully';
+         }
+      } catch (error) {
+         throw error;
+      }
+   }
+
    async updateName(userId, newName) {
       try {
          const updatedUser = await this.UserModel.findByIdAndUpdate(

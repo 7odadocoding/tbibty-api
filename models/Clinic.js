@@ -45,7 +45,10 @@ const clinicSchema = new mongoose.Schema(
          required: true,
          default: false,
       },
-
+      thumbnail: {
+         type: String,
+         default: 'N/A',
+      },
       category: {
          type: String,
          enum: ['CLINIC', 'LAB', 'XRAY'],
