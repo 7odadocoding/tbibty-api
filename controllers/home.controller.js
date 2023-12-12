@@ -10,17 +10,15 @@ class HomeController {
       try {
          const topRatedDoctors = await this.homeService.getTopRatedDoctors();
          const topRatedLabs = await this.homeService.getTopRatedLabs();
+         const latestArticles = await this.homeService.getLatestArticles();
 
          const responseData = {
             topRatedDoctors,
             topRatedLabs,
+            latestArticles,
          };
 
-         const response = successResponse(
-            'All data fetched successfully',
-            200,
-            responseData
-         );
+         const response = successResponse('All data fetched successfully', 200, responseData);
 
          res.status(response.status).json(response);
       } catch (error) {

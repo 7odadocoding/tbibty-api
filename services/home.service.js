@@ -1,5 +1,5 @@
+const Article = require('../models/Article');
 const Clinic = require('../models/Clinic');
-
 class HomeService {
    constructor(ClinicModel) {
       this.ClinicModel = ClinicModel;
@@ -28,6 +28,15 @@ class HomeService {
          return labs;
       } catch (error) {
          throw new Error('Failed to get top-rated labs');
+      }
+   }
+
+   async getLatestArticles() {
+      try {
+         const latestArticles = await Article.find().sort({ publicationDate: -1 }).limit(1).exec();
+         return latestArticles;
+      } catch (error) {
+         throw new Error('Failed to get the latest articles');
       }
    }
 }
