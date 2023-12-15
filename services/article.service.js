@@ -22,6 +22,20 @@ class ArticleService {
       }
    }
 
+   async getArticle(id) {
+      try {
+         const article = await this.ArticleModel.findById(id);
+         if (!article) {
+            const error = new Error('Article not found');
+            error.name = 'notFound';
+            throw error;
+         }
+         return article;
+      } catch (error) {
+         throw error;
+      }
+   }
+
    async createArticle(articleData) {
       try {
          const article = await this.ArticleModel.create(articleData);

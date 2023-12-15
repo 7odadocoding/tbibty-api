@@ -16,6 +16,16 @@ class ArticleController {
          next(error);
       }
    }
+   async getArticle(req, res, next) {
+      try {
+         const { id } = req.params;
+         const article = await this.service.getArticle(id);
+         const response = successResponse('Article fetched successfully', 200, article);
+         res.status(response.status).json(response);
+      } catch (error) {
+         next(error);
+      }
+   }
 }
 
 module.exports = new ArticleController();
