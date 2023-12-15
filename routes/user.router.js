@@ -10,7 +10,7 @@ userRouter.get('/saves', authenticate(), userController.getMySaves.bind(userCont
 userRouter.put('/favorites', authenticate(), userController.addOrRemoveFromFavorites.bind(userController));
 userRouter.put('/saves', authenticate(), userController.saveOrUnsaveArticle.bind(userController));
 userRouter.put('/update-name', authenticate(), userController.updateUserName.bind(userController));
-userRouter.put('/change-password', authenticate(true), userController.changePassword.bind(userController));
+userRouter.put('/change-password', authenticate(), userController.changePassword.bind(userController));
 userRouter.delete('/delete-profile', authenticate(true), userController.deleteMyProfile.bind(userController));
 
 module.exports = userRouter;
