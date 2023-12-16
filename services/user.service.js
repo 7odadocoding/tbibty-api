@@ -24,7 +24,7 @@ class UserService {
    async me(userId) {
       try {
          const user = await this.UserModel.findById(userId).select(
-            'fullname email age gender city governorate createdAt'
+            '-password -role -emailVerified -banned -otp -updatedAt -__v'
          );
 
          if (!user) {
