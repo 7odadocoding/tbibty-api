@@ -141,7 +141,6 @@ class UserService {
             return 'Clinic added to favorites successfully';
          } else {
             user.favorites.splice(index, 1);
-            s;
             await user.save();
             return 'Clinic removed from favorites successfully';
          }
