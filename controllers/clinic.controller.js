@@ -1,6 +1,13 @@
 const clinicalService = require('../services/clinic.service');
 const successResponse = require('../utils/success');
-const { CLINIC_NOT_FOUND, GET_CLINIC_SUCCESS, SEARCH_SUCCESS, GET_CLINICS_SUCCESS } = require('../configs/responses');
+const {
+   CLINIC_NOT_FOUND,
+   GET_CLINIC_SUCCESS,
+   SEARCH_SUCCESS,
+   GET_CLINICS_SUCCESS,
+   LAB_NOT_FOUND,
+} = require('../configs/responses');
+const CustomError = require('../utils/customError');
 
 class ClinicController {
    constructor() {
@@ -13,9 +20,7 @@ class ClinicController {
          let clinic = await this.service.getClinicById(id);
 
          if (!clinic) {
-            let error = new Error(CLINIC_NOT_FOUND);
-            error.name = 'NotFound';
-            throw error;
+            throw new CustomError(CLINIC_NOT_FOUND, 'notFound');
          }
 
          let success = successResponse(GET_CLINIC_SUCCESS(id), 200, clinic);
@@ -25,10 +30,29 @@ class ClinicController {
       }
    }
 
+   async getLab(req, res, next) {
+      try {
+         let { id } = req.params;
+         let lab = await this.service.getLabById(id);
+
+         if (!lab) {
+            throw new CustomError(LAB_NOT_FOUND, 'notFound');
+         }
+
+         let success = successResponse(GET_CLINIC_SUCCESS(id), 200, lab);
+         res.status(success.status).json(success);
+      } catch (error) {
+         next(error);
+      }
+   }
+
    async getClinics(req, res, next) {
       try {
-         let { limit, page } = req.query;
-         let clinics = await this.service.getClinics(limit, page);
+         let { limit, page, category } = req.query;
+         if (category && !['LAB', 'CLINIC'].includes(category)) {
+            throw new CustomError(`Invalid Category got: ${category} expected: LAB , CLINIC` , 'badRequest');
+         }
+         let clinics = await this.service.getClinics(limit, page, category);
          let success = successResponse(GET_CLINICS_SUCCESS, 200, clinics);
          res.status(success.status).json(success);
       } catch (error) {

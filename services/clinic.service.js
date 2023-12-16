@@ -1,12 +1,18 @@
+const { default: mongoose } = require('mongoose');
 const Clinic = require('../models/Clinic');
 
 class ClinicService {
    constructor(ClinicModel) {
       this.ClinicModel = ClinicModel;
    }
-   async getClinicById(id) {
+
+   async findOne(id, category) {
       try {
-         return await Clinic.findById(id)
+         const query = {
+            $and: [{ _id: new mongoose.Types.ObjectId(id) }, category ? { category } : {}],
+         };
+
+         return await Clinic.findOne(query)
             .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
             .lean();
       } catch (error) {
@@ -15,11 +21,29 @@ class ClinicService {
       }
    }
 
-   async getClinics(limit, page) {
+   async getClinicById(id) {
+      return await this.findOne(id, 'CLINIC');
+   }
+
+   async getLabById(id) {
+      return await this.findOne(id, 'LAB');
+   }
+
+   async getClinics(limit, page, category) {
       try {
          let skip = (page - 1) * limit;
-         let clinics = await Clinic.find()
-            .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
+         let clinics = await Clinic.find(category ? { category } : {})
+            .select([
+               'doctorName',
+               'specialization',
+               'degree',
+               'phone',
+               'address',
+               'locationUrl',
+               'workTimes',
+               'price',
+               'category',
+            ])
             .skip(skip)
             .limit(limit)
             .lean();

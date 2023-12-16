@@ -153,11 +153,7 @@ class AuthService {
             error.name = 'notFound';
             throw error;
          }
-         if (!user.emailVerified) {
-            const error = new Error('Email should be verified');
-            error.name = 'badRequest';
-            throw error;
-         }
+
          const newPasswordOTP = this.generateOTP();
          user.otp = {
             value: newPasswordOTP,
@@ -203,12 +199,6 @@ class AuthService {
          if (!user) {
             const error = new Error('User Not Found');
             error.name = 'notFound';
-            throw error;
-         }
-
-         if (!user.emailVerified) {
-            const error = new Error('Email should be verified');
-            error.name = 'badRequest';
             throw error;
          }
 
