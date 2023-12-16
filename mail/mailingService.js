@@ -64,6 +64,7 @@ class MailingService {
 
    async sendVerificationEmail(to, otp) {
       try {
+         console.log('SENT TO:', to);
          const emailTemplate = new Email(this.verifyEmailTemplate, { otp });
          const html = await emailTemplate.generateHtml();
          await this.sendEmail(to, 'Email Verification', html);

@@ -1,7 +1,7 @@
 const MailingService = require('../mail/mailingService');
 const { hashPassword, checkPassword, generateOTP } = require('../utils/userUtils');
 
-const OTP_EXPIRY_MINUTES = 10;
+const OTP_EXPIRY_MINUTES = 5;
 
 class AuthService {
    constructor(UserModel) {
@@ -25,6 +25,7 @@ class AuthService {
          const hashedPassword = await this.hashPassword(password);
          const newOTP = this.generateOTP();
          const newOTPExp = OTP_EXPIRY_MINUTES;
+         await this.mailingService.sendVerificationEmail(email, newOTP);
          const user = new this.UserModel({
             fullname,
             city,
@@ -40,7 +41,6 @@ class AuthService {
             image,
          });
 
-         this.mailingService.sendVerificationEmail(email, newOTP);
          const newUser = await user.save();
 
          return {
@@ -49,6 +49,7 @@ class AuthService {
             role: newUser.role,
             emailVerified: user.emailVerified,
             newOTPExp,
+            secure_url: newUser.image.secure_url,
          };
       } catch (error) {
          throw error;
@@ -69,7 +70,6 @@ class AuthService {
          const isEqual = await this.checkPassword(password, hashedPassword);
 
          if (!isEqual) return false;
-
          return {
             id: user._id,
             fullname: user.fullname,
@@ -79,6 +79,7 @@ class AuthService {
             governorate: user.governorate,
             age: user.age,
             email: user.email,
+            image: user.image,
          };
       } catch (error) {
          throw error;
@@ -123,22 +124,21 @@ class AuthService {
    async verifyEmail(email, otp) {
       try {
          const user = await this.UserModel.findOne({ email });
-
          if (!user) {
             const error = new Error('User not found');
             error.name = 'notFound';
             throw error;
          }
 
-         if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
+         const isExpired = new Date(Date.now()) > user.otp.expiryDate;
+         if (user.otp && !user.otp.isExpired && user.otp.value === otp && !isExpired) {
             user.otp.isExpired = true;
             user.emailVerified = true;
             await user.save();
 
             return { success: true, message: 'Email successfully verified' };
-         } else {
-            return { success: false, message: 'Invalid OTP or OTP has expired' };
          }
+         return { success: false, message: 'Invalid OTP or OTP has expired' };
       } catch (error) {
          throw error;
       }
@@ -181,22 +181,17 @@ class AuthService {
    async validateOTP(email, otp) {
       try {
          const user = await this.UserModel.findOne({ email });
-
          if (!user) {
             const error = new Error('User Not Found');
             error.name = 'notFound';
             throw error;
          }
 
-         if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
-            user.otp.isExpired = true;
-            user.password = await this.hashPassword(newPassword);
-            await user.save();
-
+         const isExpired = new Date(Date.now()) > user.otp.expiryDate;
+         if (user.otp && !user.otp.isExpired && user.otp.value === otp && !isExpired) {
             return { success: true, message: 'valid OTP' };
-         } else {
-            return { success: false, message: 'Invalid OTP or OTP has expired' };
          }
+         return { success: false, message: 'Invalid OTP or OTP has expired' };
       } catch (error) {
          throw error;
       }
@@ -205,7 +200,6 @@ class AuthService {
    async resetPassword(email, otp, newPassword) {
       try {
          const user = await this.UserModel.findOne({ email });
-
          if (!user) {
             const error = new Error('User Not Found');
             error.name = 'notFound';
@@ -218,15 +212,14 @@ class AuthService {
             throw error;
          }
 
-         if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
+         const isExpired = new Date(Date.now()) > user.otp.expiryDate;
+         if (user.otp && !user.otp.isExpired && user.otp.value === otp && !isExpired) {
             user.otp.isExpired = true;
             user.password = await this.hashPassword(newPassword);
             await user.save();
-
             return { success: true, message: 'Password successfully reseted' };
-         } else {
-            return { success: false, message: 'Invalid OTP or OTP has expired' };
          }
+         return { success: false, message: 'Invalid OTP or OTP has expired' };
       } catch (error) {
          throw error;
       }
