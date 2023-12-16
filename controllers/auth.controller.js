@@ -39,14 +39,7 @@ class AuthController {
    async signup(req, res, next) {
       try {
          let { fullname, city, governorate, gender, email, password } = req.body;
-         let user = await this.service.signup(
-            fullname,
-            city,
-            governorate,
-            gender,
-            email,
-            password
-         );
+         let user = await this.service.signup(fullname, city, governorate, gender, email, password);
          let success = successResponse(SIGNUP_SUCCESS, 200, user);
          res.status(success.status).json(success);
       } catch (error) {
@@ -106,6 +99,25 @@ class AuthController {
          }
       } catch (error) {
          console.log(error.message);
+         next(error);
+      }
+   }
+
+   async validateOTP(req, res, next) {
+      const { email, otp } = req.body;
+
+      try {
+         const result = await this.service.validateOTP(email, otp);
+
+         if (result.success) {
+            let response = successResponse(result.message, 200);
+            res.status(response.status).json(response);
+         } else {
+            let response = errorResponse('badRequest', result.message);
+            res.status(response.statusCode).json(response);
+         }
+      } catch (error) {
+         console.log(error);
          next(error);
       }
    }

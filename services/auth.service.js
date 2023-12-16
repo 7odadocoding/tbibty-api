@@ -177,6 +177,30 @@ class AuthService {
       }
    }
 
+   async validateOTP(email, otp) {
+      try {
+         const user = await this.UserModel.findOne({ email });
+
+         if (!user) {
+            const error = new Error('User Not Found');
+            error.name = 'notFound';
+            throw error;
+         }
+
+         if (user.otp && !user.otp.isExpired && user.otp.value === otp) {
+            user.otp.isExpired = true;
+            user.password = await this.hashPassword(newPassword);
+            await user.save();
+
+            return { success: true, message: 'valid OTP' };
+         } else {
+            return { success: false, message: 'Invalid OTP or OTP has expired' };
+         }
+      } catch (error) {
+         throw error;
+      }
+   }
+
    async resetPassword(email, otp, newPassword) {
       try {
          const user = await this.UserModel.findOne({ email });

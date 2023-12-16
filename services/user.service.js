@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const User = require('../models/User');
 
 class UserService {
@@ -56,10 +57,7 @@ class UserService {
 
    async getUserFavorites(userId) {
       try {
-         const user = await this.UserModel.findById(userId).populate({
-            path: 'favorites',
-            select: 'doctorName specialization rating',
-         });
+         const user = await this.UserModel.findById(userId);
 
          if (!user) {
             const error = new Error('User not found');
@@ -67,7 +65,40 @@ class UserService {
             throw error;
          }
 
-         return user.favorites;
+         const favoritesPipeline = [
+            { $match: { _id:new mongoose.Types.ObjectId(userId) } },
+            {
+               $lookup: {
+                  from: 'clinics', // Adjust the collection name if needed
+                  localField: 'favorites',
+                  foreignField: '_id',
+                  as: 'clinicFavorites',
+               },
+            },
+            {
+               $project: {
+                  _id: 0,
+                  labs: {
+                     $filter: {
+                        input: '$clinicFavorites',
+                        as: 'clinic',
+                        cond: { $eq: ['$$clinic.category', 'LAB'] },
+                     },
+                  },
+                  clinics: {
+                     $filter: {
+                        input: '$clinicFavorites',
+                        as: 'clinic',
+                        cond: { $eq: ['$$clinic.category', 'CLINIC'] },
+                     },
+                  },
+               },
+            },
+         ];
+
+         const favorites = await this.UserModel.aggregate(favoritesPipeline);
+
+         return favorites[0];
       } catch (error) {
          throw error;
       }
