@@ -5,6 +5,7 @@ const authRouter = require('./auth.router');
 const clinicRouter = require('./clinics.router');
 const homeRouter = require('./home.router');
 const reviewRouter = require('./review.router');
+const uploadRouter = require('./upload.router');
 const userRouter = require('./user.router');
 const mainRouter = require('express').Router();
 
@@ -16,5 +17,6 @@ mainRouter.use('/user', userRouter);
 mainRouter.use('/home', homeRouter);
 mainRouter.use('/reviews', reviewRouter);
 mainRouter.use('/articles', articleRouter);
+mainRouter.use('/upload', uploadRouter);
 
 module.exports = mainRouter;

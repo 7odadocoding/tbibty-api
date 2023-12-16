@@ -12,7 +12,7 @@ class AuthService {
       this.generateOTP = generateOTP;
    }
 
-   async signup(fullname, city, governorate, gender, email, password) {
+   async signup(fullname, city, governorate, gender, email, password, image) {
       try {
          const existentUser = await this.UserModel.findOne({ email });
 
@@ -37,6 +37,7 @@ class AuthService {
                expiryDate: new Date(Date.now() + newOTPExp * 60 * 1000),
                isExpired: false,
             },
+            image,
          });
 
          this.mailingService.sendVerificationEmail(email, newOTP);

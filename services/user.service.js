@@ -1,5 +1,6 @@
 const { default: mongoose } = require('mongoose');
 const User = require('../models/User');
+const uploadService = require('./upload.service');
 
 class UserService {
    constructor(UserModel) {
@@ -66,7 +67,7 @@ class UserService {
          }
 
          const favoritesPipeline = [
-            { $match: { _id:new mongoose.Types.ObjectId(userId) } },
+            { $match: { _id: new mongoose.Types.ObjectId(userId) } },
             {
                $lookup: {
                   from: 'clinics', // Adjust the collection name if needed
@@ -224,6 +225,11 @@ class UserService {
             const error = new Error('User not found');
             error.name = 'notFound';
             throw error;
+         }
+
+         const publicId = user.image.public_id;
+         if (publicId !== 'user_images/default') {
+            await uploadService.destroyImage(publicId);
          }
 
          const isPasswordMatch = await user.comparePassword(password);

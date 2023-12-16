@@ -8,6 +8,9 @@ const env = {
    saltRounds: +process.env.ROUNDS || +process.env.ROUNDS_DEV,
    gmailUser: process.env.GMAIL_EMAIL,
    gmailPass: process.env.GMAIL_PASS,
+   cloudName: process.env.CLOUD_NAME,
+   cloudApiKey: process.env.CLOUD_API_KEY,
+   cloudApiSecret: process.env.CLOUD_API_SECRET,
 };
 
 module.exports = env;

@@ -38,8 +38,8 @@ class AuthController {
 
    async signup(req, res, next) {
       try {
-         let { fullname, city, governorate, gender, email, password } = req.body;
-         let user = await this.service.signup(fullname, city, governorate, gender, email, password);
+         let { fullname, city, governorate, gender, email, password, image } = req.body;
+         let user = await this.service.signup(fullname, city, governorate, gender, email, password, image);
          let success = successResponse(SIGNUP_SUCCESS, 200, user);
          res.status(success.status).json(success);
       } catch (error) {

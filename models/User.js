@@ -70,6 +70,18 @@ const userSchema = new mongoose.Schema(
             ref: 'Article',
          },
       ],
+      image: {
+         secure_url: {
+            type: String,
+            required: true,
+            default: 'default',
+         },
+         public_id: {
+            type: String,
+            required: true,
+            default: 'user_images/default',
+         },
+      },
    },
    { timestamps: true }
 );
