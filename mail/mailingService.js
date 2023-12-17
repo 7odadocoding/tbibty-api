@@ -30,6 +30,7 @@ class MailingService {
       });
       this.forgetPasswordTemplate = './templates/forgetPassword.ejs';
       this.verifyEmailTemplate = './templates/verifyEmail.ejs';
+      this.contactUsEmailTemplate = './templates/contactUs.ejs';
    }
 
    async serviceRunning() {
@@ -84,6 +85,20 @@ class MailingService {
          throw new Error(`Error sending forgot password email: ${error.message}`);
       }
    }
+
+   async contact(email, name, message) {
+      try {
+         const emailTemplate = new Email(this.contactUsEmailTemplate, {
+            email,
+            name,
+            message,
+         });
+         const html = await emailTemplate.generateHtml();
+         await this.sendEmail(gmailUser, 'Contact Us', html);
+      } catch (error) {
+         throw new Error(`Error sending forgot password email: ${error.message}`);
+      }
+   }
 }
 
-module.exports = MailingService;
+module.exports = new MailingService();

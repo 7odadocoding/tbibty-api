@@ -1,4 +1,4 @@
-const MailingService = require('../mail/mailingService');
+const mailingService = require('../mail/mailingService');
 const { hashPassword, checkPassword, generateOTP } = require('../utils/userUtils');
 
 const OTP_EXPIRY_MINUTES = 5;
@@ -6,7 +6,7 @@ const OTP_EXPIRY_MINUTES = 5;
 class AuthService {
    constructor(UserModel) {
       this.UserModel = UserModel;
-      this.mailingService = new MailingService();
+      this.mailingService = mailingService
       this.hashPassword = hashPassword;
       this.checkPassword = checkPassword;
       this.generateOTP = generateOTP;

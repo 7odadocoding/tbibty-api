@@ -1,13 +1,13 @@
 const authController = require('../controllers/auth.controller');
 
-const userRouter = require('express').Router();
+const authRouter = require('express').Router();
 
-userRouter.post('/login', authController.login.bind(authController));
-userRouter.post('/signup', authController.signup.bind(authController));
-userRouter.put('/verify', authController.verifyEmail.bind(authController));
-userRouter.post('/verify/resend', authController.resendOtp.bind(authController));
-userRouter.post('/forget-password', authController.forgetPassword.bind(authController));
-userRouter.post('/validate-otp', authController.validateOTP.bind(authController));
-userRouter.put('/reset-password', authController.resetPassword.bind(authController));
+authRouter.post('/login', authController.login.bind(authController));
+authRouter.post('/signup', authController.signup.bind(authController));
+authRouter.put('/verify', authController.verifyEmail.bind(authController));
+authRouter.post('/verify/resend', authController.resendOtp.bind(authController));
+authRouter.post('/forget-password', authController.forgetPassword.bind(authController));
+authRouter.post('/validate-otp', authController.validateOTP.bind(authController));
+authRouter.put('/reset-password', authController.resetPassword.bind(authController));
 
-module.exports = userRouter;
+module.exports = authRouter;
