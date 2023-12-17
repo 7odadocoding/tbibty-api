@@ -1,5 +1,6 @@
-const { default: mongoose } = require('mongoose');
+const { default: mongoose, isValidObjectId } = require('mongoose');
 const Clinic = require('../models/Clinic');
+const CustomError = require('../utils/customError');
 
 class ClinicService {
    constructor(ClinicModel) {
@@ -8,6 +9,9 @@ class ClinicService {
 
    async findOne(id, category) {
       try {
+         if (!isValidObjectId(id)) {
+            throw new CustomError('the id passed is not a valid objectId', 'badRequest');
+         }
          const query = {
             $and: [{ _id: new mongoose.Types.ObjectId(id) }, category ? { category } : {}],
          };
@@ -16,7 +20,7 @@ class ClinicService {
             .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
             .lean();
       } catch (error) {
-         error.name = 'DatabaseError';
+         console.log(error);
          throw error;
       }
    }
