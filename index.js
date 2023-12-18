@@ -12,7 +12,7 @@ const ping = require('./middlewares/ping');
 const app = express();
 
 connectDB();
-connectCloud()
+connectCloud();
 
 // app.use(apiLimiter(50)); api limiter doesn't work as intended with helmet
 app.use(helmet());

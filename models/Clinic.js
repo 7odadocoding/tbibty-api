@@ -57,25 +57,7 @@ const clinicSchema = new mongoose.Schema(
    { timestamps: true }
 );
 
-clinicSchema.virtual('averageRating', {
-   ref: 'Review',
-   localField: '_id',
-   foreignField: 'clinicId',
-   justOne: false,
-   count: true,
-   options: { match: { reported: false } },
-});
 
-clinicSchema.virtual('averageRatingValue').get(function () {
-   return this.averageRating ? this.averageRating / this.reviewsCount : 0;
-});
-
-clinicSchema.virtual('reviewsCount').get(function () {
-   return this.averageRating ? this.averageRating : 0;
-});
-
-clinicSchema.set('toObject', { virtuals: true });
-clinicSchema.set('toJSON', { virtuals: true });
 
 const Clinic = mongoose.model('Clinic', clinicSchema);
 

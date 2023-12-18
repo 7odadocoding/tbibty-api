@@ -74,12 +74,24 @@ class UserController {
       }
    }
 
-   async updateUserName(req, res, next) {
+   async updateUserData(req, res, next) {
       try {
          const { userId } = req.user;
-         const { newName } = req.body;
-         const updatedUser = await this.service.updateName(userId, newName);
-         const response = successResponse('User name updated successfully', 200, updatedUser);
+         const { fullname, age, city, governorate, gender } = req.body;
+         const newData = await this.service.updateData(userId, { fullname, age, city, governorate, gender });
+         const response = successResponse('User data updated successfully', 200, newData);
+         res.status(response.status).json(response);
+      } catch (error) {
+         next(error);
+      }
+   }
+
+   async changeImage(req, res, next) {
+      try {
+         const { userId } = req.user;
+         const { secure_url, public_id } = req.body;
+         const newImage = await this.service.changeImage(userId, { secure_url, public_id });
+         const response = successResponse('User image changed successfully', 200, newImage);
          res.status(response.status).json(response);
       } catch (error) {
          next(error);

@@ -9,7 +9,8 @@ userRouter.get('/favorites', authenticate(), userController.getMyFavorites.bind(
 userRouter.get('/saves', authenticate(), userController.getMySaves.bind(userController));
 userRouter.put('/favorites', authenticate(), userController.addOrRemoveFromFavorites.bind(userController));
 userRouter.put('/saves', authenticate(), userController.saveOrUnsaveArticle.bind(userController));
-userRouter.put('/update-name', authenticate(), userController.updateUserName.bind(userController));
+userRouter.put('/update-data', authenticate(), userController.updateUserData.bind(userController));
+userRouter.put('/change-image', authenticate(), userController.changeImage.bind(userController));
 userRouter.put('/change-password', authenticate(), userController.changePassword.bind(userController));
 userRouter.delete('/delete-profile', authenticate(true), userController.deleteMyProfile.bind(userController));
 

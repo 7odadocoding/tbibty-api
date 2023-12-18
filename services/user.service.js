@@ -173,21 +173,67 @@ class UserService {
       }
    }
 
-   async updateName(userId, newName) {
+   async updateData(userId, { fullname, age, city, governorate, gender }) {
       try {
-         const updatedUser = await this.UserModel.findByIdAndUpdate(
-            userId,
-            { fullname: newName },
-            { new: true, runValidators: true }
-         );
+         const user = await this.UserModel.findById(userId);
+         if (!user) {
+            const error = new Error('User not found');
+            error.name = 'notFound';
+            throw error;
+         }
+         const updatedFields = {};
 
-         if (!updatedUser) {
+         if (fullname !== undefined) {
+            user.fullname = fullname;
+            updatedFields.fullname = fullname;
+         }
+
+         if (age !== undefined) {
+            user.age = age;
+            updatedFields.age = age;
+         }
+
+         if (city !== undefined) {
+            user.city = city;
+            updatedFields.city = city;
+         }
+
+         if (governorate !== undefined) {
+            user.governorate = governorate;
+            updatedFields.governorate = governorate;
+         }
+
+         if (gender !== undefined) {
+            user.gender = gender;
+            updatedFields.gender = gender;
+         }
+
+         await user.save();
+
+         return updatedFields;
+      } catch (error) {
+         throw error;
+      }
+   }
+
+   async changeImage(userId, { secure_url, public_id }) {
+      try {
+         const user = await this.UserModel.findById(userId);
+         if (!user) {
             const error = new Error('User not found');
             error.name = 'notFound';
             throw error;
          }
 
-         return updatedUser.fullname;
+         const publicId = user.image.public_id;
+         if (publicId !== 'user_images/default') {
+            await uploadService.destroyImage(publicId);
+         }
+
+         user.image = { secure_url, public_id };
+         await user.save();
+
+         return { secure_url, public_id };
       } catch (error) {
          throw error;
       }
