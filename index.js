@@ -18,7 +18,7 @@ connectCloud()
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: '*' }));
 app.get('/ping', ping);
 app.use('/api/v1', v1Routes);
