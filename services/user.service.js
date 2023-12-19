@@ -173,7 +173,7 @@ class UserService {
       }
    }
 
-   async updateData(userId, { fullname, age, city, governorate, gender }) {
+   async updateData(userId, { fullname, age, city, governorate, gender, image }) {
       try {
          const user = await this.UserModel.findById(userId);
          if (!user) {
@@ -208,32 +208,18 @@ class UserService {
             updatedFields.gender = gender;
          }
 
+         if (image) {
+            user.image = image;
+            const publicId = user.image.public_id;
+            if (publicId !== 'user_images/default') {
+               await uploadService.destroyImage(publicId);
+            }
+            updatedFields.image = image;
+         }
+
          await user.save();
 
          return updatedFields;
-      } catch (error) {
-         throw error;
-      }
-   }
-
-   async changeImage(userId, { secure_url, public_id }) {
-      try {
-         const user = await this.UserModel.findById(userId);
-         if (!user) {
-            const error = new Error('User not found');
-            error.name = 'notFound';
-            throw error;
-         }
-
-         const publicId = user.image.public_id;
-         if (publicId !== 'user_images/default') {
-            await uploadService.destroyImage(publicId);
-         }
-
-         user.image = { secure_url, public_id };
-         await user.save();
-
-         return { secure_url, public_id };
       } catch (error) {
          throw error;
       }
