@@ -33,8 +33,6 @@ class AuthController {
    async signup(req, res, next) {
       try {
          let { fullname, city, governorate,  email, password, image } = req.body;
-         city = city.city_name_ar;
-         governorate = governorate.governorate_name_ar;
          let user = await this.service.signup(fullname, city, governorate, email, password, image);
          let success = successResponse(SIGNUP_SUCCESS, 200, user);
          res.status(success.status).json(success);

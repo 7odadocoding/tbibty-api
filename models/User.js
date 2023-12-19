@@ -12,14 +12,24 @@ const userSchema = new mongoose.Schema(
          unique: true,
       },
       city: {
-         type: String,
-         required: true,
-         validate: () => {},
+         governorate_id: {
+            type: Number,
+            required: true,
+         },
+         city_name_ar: {
+            type: String,
+            required: true,
+         },
       },
       governorate: {
-         type: String,
-         required: true,
-         validate: () => {},
+         id: {
+            type: Number,
+            required: true,
+         },
+         governorate_name_ar: {
+            type: String,
+            required: true,
+         },
       },
       password: {
          type: String,
