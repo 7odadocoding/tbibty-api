@@ -59,23 +59,30 @@ class ClinicService {
       }
    }
 
-   async searchClinics(searchBy, keyword) {
+   async searchClinics(searchBy, keyword, category) {
       try {
          const validSearchFields = ['doctorName', 'specialization', 'address'];
+         const allowedCategories = ['CLINIC', 'LAB'];
 
+         if (!searchBy || !keyword) {
+            throw new CustomError('Search parameters are required', 'badRequest');
+         }
          if (!validSearchFields.includes(searchBy)) {
-            throw new Error('Invalid search field');
+            throw new CustomError('Invalid search field', 'badRequest');
+         }
+         if (category && !allowedCategories.includes(category)) {
+            throw new CustomError('Invalid category', 'badRequest');
          }
 
          const searchQuery = {
-            [searchBy]: { $regex: new RegExp(keyword, 'i') }, // Case-insensitive search
+            [searchBy]: { $regex: new RegExp(keyword, 'i') },
+            category: { $in: category ? [category] : allowedCategories },
          };
-
          const searchResult = await Clinic.find(searchQuery).exec();
          return searchResult;
       } catch (error) {
          console.error('Error in searchClinics:', error.message);
-         throw new Error('Failed to perform clinic search');
+         throw error;
       }
    }
 

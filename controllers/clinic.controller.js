@@ -50,7 +50,7 @@ class ClinicController {
       try {
          let { limit, page, category } = req.query;
          if (category && !['LAB', 'CLINIC'].includes(category)) {
-            throw new CustomError(`Invalid Category got: ${category} expected: LAB , CLINIC` , 'badRequest');
+            throw new CustomError(`Invalid Category got: ${category} expected: LAB , CLINIC`, 'badRequest');
          }
          let clinics = await this.service.getClinics(limit, page, category);
          let success = successResponse(GET_CLINICS_SUCCESS, 200, clinics);
@@ -62,8 +62,8 @@ class ClinicController {
 
    async searchClinics(req, res, next) {
       try {
-         let { by, keyword } = req.query;
-         let searchResult = await this.service.searchClinics(by, keyword);
+         let { by, keyword, category } = req.query;
+         let searchResult = await this.service.searchClinics(by, keyword, category);
          let success = successResponse(SEARCH_SUCCESS, 200, searchResult);
          res.status(success.status).json(success);
       } catch (error) {

@@ -57,8 +57,6 @@ const clinicSchema = new mongoose.Schema(
    { timestamps: true }
 );
 
-
-
 const Clinic = mongoose.model('Clinic', clinicSchema);
 
 module.exports = Clinic;
