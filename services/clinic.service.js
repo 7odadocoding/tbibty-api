@@ -12,13 +12,28 @@ class ClinicService {
          if (!isValidObjectId(id)) {
             throw new CustomError('the id passed is not a valid objectId', 'badRequest');
          }
+
          const query = {
             $and: [{ _id: new mongoose.Types.ObjectId(id) }, category ? { category } : {}],
          };
 
-         return await Clinic.findOne(query)
-            .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
-            .lean();
+         const clinic = await Clinic.findOne(query).select([
+            'doctorName',
+            'specialization',
+            'degree',
+            'phone',
+            'address',
+            'locationUrl',
+            'thumbnail',
+            'rating',
+            'workTimes',
+            'price',
+         ]);
+
+         const populatedClinic = clinic.toObject();
+         populatedClinic.averageRating = await clinic.averageRating;
+
+         return populatedClinic;
       } catch (error) {
          console.log(error);
          throw error;
@@ -46,15 +61,21 @@ class ClinicService {
                'locationUrl',
                'workTimes',
                'price',
+               'thumbnail',
                'category',
             ])
             .skip(skip)
-            .limit(limit)
-            .lean();
+            .limit(limit);
 
-         return clinics;
+         const populatedClinics = await Promise.all(
+            clinics.map(async (clinic) => {
+               clinic.averageRating = await clinic.averageRating;
+               return clinic;
+            })
+         );
+
+         return populatedClinics;
       } catch (error) {
-         error.name = 'DatabaseError';
          throw error;
       }
    }
@@ -78,7 +99,17 @@ class ClinicService {
             [searchBy]: { $regex: new RegExp(keyword, 'i') },
             category: { $in: category ? [category] : allowedCategories },
          };
-         const searchResult = await Clinic.find(searchQuery).exec();
+         let searchResult = await Clinic.find(searchQuery)
+            .select(['doctorName', 'specialization', 'thumbnail', 'category'])
+            .exec();
+         if (searchResult.length) {
+            searchResult = await Promise.all(
+               searchResult.map(async (clinic) => {
+                  clinic.averageRating = await clinic.averageRating;
+                  return clinic;
+               })
+            );
+         }
          return searchResult;
       } catch (error) {
          console.error('Error in searchClinics:', error.message);
