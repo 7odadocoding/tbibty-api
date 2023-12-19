@@ -9,9 +9,13 @@ const articleSchema = new mongoose.Schema({
       type: String,
       default: 'N/A',
    },
+   url: {
+      type: String,
+      default: 'N/A',
+   },
    abstract: {
       type: String,
-      required: true,
+      // required: true,
    },
    main: {
       sections: [
@@ -29,7 +33,7 @@ const articleSchema = new mongoose.Schema({
    author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Clinic',
-      required: true,
+      // required: true,
    },
    keywords: [
       {

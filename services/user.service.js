@@ -173,7 +173,7 @@ class UserService {
       }
    }
 
-   async updateData(userId, { fullname, age, city, governorate, gender, image }) {
+   async updateData(userId, { fullname, city, governorate, image }) {
       try {
          const user = await this.UserModel.findById(userId);
          if (!user) {
@@ -188,11 +188,6 @@ class UserService {
             updatedFields.fullname = fullname;
          }
 
-         if (age !== undefined) {
-            user.age = age;
-            updatedFields.age = age;
-         }
-
          if (city !== undefined) {
             user.city = city;
             updatedFields.city = city;
@@ -201,11 +196,6 @@ class UserService {
          if (governorate !== undefined) {
             user.governorate = governorate;
             updatedFields.governorate = governorate;
-         }
-
-         if (gender !== undefined) {
-            user.gender = gender;
-            updatedFields.gender = gender;
          }
 
          if (image) {

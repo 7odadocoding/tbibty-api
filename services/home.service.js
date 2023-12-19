@@ -7,25 +7,58 @@ class HomeService {
 
    async getTopRatedDoctors() {
       try {
-         const doctors = await this.ClinicModel.find({ category: 'CLINIC' })
-            .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
-            .sort({ reviewsCount: -1, averageRatingValue: -1 })
+         let doctors = await this.ClinicModel.find({ category: 'CLINIC' })
+            .select([
+               'doctorName',
+               'thumbnail',
+               'specialization',
+               'degree',
+               'phone',
+               'address',
+               'locationUrl',
+               'workTimes',
+               'price',
+            ])
             .limit(3)
+            .sort({ averageRating: -1 })
             .exec();
 
+         doctors = await Promise.all(
+            doctors.map(async (doctor) => {
+               doctor.averageRating = await doctor.averageRating;
+               return doctor;
+            })
+         );
          return doctors;
       } catch (error) {
+         console.log(error);
          throw new Error('Failed to get top-rated doctors');
       }
    }
 
    async getTopRatedLabs() {
       try {
-         const labs = await this.ClinicModel.find({ category: 'LAB' })
-            .select(['doctorName', 'specialization', 'degree', 'phone', 'address', 'locationUrl', 'workTimes', 'price'])
-            .sort({ reviewsCount: -1, averageRatingValue: -1 })
+         let labs = await this.ClinicModel.find({ category: 'LAB' })
+            .select([
+               'doctorName',
+               'thumbnail',
+               'specialization',
+               'degree',
+               'phone',
+               'address',
+               'locationUrl',
+               'workTimes',
+               'price',
+            ])
             .limit(3)
+            .sort({ averageRating: -1 })
             .exec();
+         labs = await Promise.all(
+            labs.map(async (lab) => {
+               lab.averageRating = await lab.averageRating;
+               return lab;
+            })
+         );
 
          return labs;
       } catch (error) {

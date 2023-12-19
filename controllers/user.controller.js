@@ -77,8 +77,8 @@ class UserController {
    async updateUserData(req, res, next) {
       try {
          const { userId } = req.user;
-         const { fullname, age, city, governorate, gender, image } = req.body;
-         const newData = await this.service.updateData(userId, { fullname, age, city, governorate, gender, image });
+         const { fullname, city, governorate, image } = req.body;
+         const newData = await this.service.updateData(userId, { fullname, city, governorate, image });
          const response = successResponse('User data updated successfully', 200, newData);
          res.status(response.status).json(response);
       } catch (error) {

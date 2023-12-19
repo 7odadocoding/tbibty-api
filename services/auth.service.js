@@ -6,13 +6,13 @@ const OTP_EXPIRY_MINUTES = 5;
 class AuthService {
    constructor(UserModel) {
       this.UserModel = UserModel;
-      this.mailingService = mailingService
+      this.mailingService = mailingService;
       this.hashPassword = hashPassword;
       this.checkPassword = checkPassword;
       this.generateOTP = generateOTP;
    }
 
-   async signup(fullname, city, governorate, gender, email, password, image) {
+   async signup(fullname, city, governorate, email, password, image) {
       try {
          const existentUser = await this.UserModel.findOne({ email });
 
@@ -30,7 +30,6 @@ class AuthService {
             fullname,
             city,
             governorate,
-            gender,
             email,
             password: hashedPassword,
             otp: {
@@ -74,10 +73,8 @@ class AuthService {
             id: user._id,
             fullname: user.fullname,
             role: user.role,
-            gender: user.gender,
             city: user.city,
             governorate: user.governorate,
-            age: user.age,
             email: user.email,
             image: user.image,
          };

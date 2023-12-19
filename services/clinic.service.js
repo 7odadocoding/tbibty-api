@@ -80,7 +80,7 @@ class ClinicService {
       }
    }
 
-   async searchClinics(searchBy, keyword, category) {
+   async searchClinics(searchBy = 'doctorName', keyword, category) {
       try {
          const validSearchFields = ['doctorName', 'specialization', 'address'];
          const allowedCategories = ['CLINIC', 'LAB'];
@@ -177,3 +177,14 @@ class ClinicService {
 }
 
 module.exports = new ClinicService(Clinic);
+
+/*
+  const filter = data.filter((item) => {
+   const itemTitle = item?.title ? item?.title.toUpperCase() : ''.toUpperCase();
+   const itemContent = item?.content ? item?.content.toUpperCase() : ''.toUpperCase();
+   const itemData = item?.short_description ? item?.short_description.toUpperCase() : ''.toUpperCase();
+   const textData = text.toUpperCase();
+   return itemTitle.indexOf(textData) > -1 || itemContent.indexOf(textData) > -1 || itemData.indexOf(textData) > -1;
+});
+
+ */
