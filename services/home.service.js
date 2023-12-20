@@ -1,5 +1,6 @@
 const Article = require('../models/Article');
 const Clinic = require('../models/Clinic');
+
 class HomeService {
    constructor(ClinicModel) {
       this.ClinicModel = ClinicModel;
@@ -7,29 +8,53 @@ class HomeService {
 
    async getTopRatedDoctors() {
       try {
-         let doctors = await this.ClinicModel.find({ category: 'CLINIC' })
-            .select([
-               'doctorName',
-               'thumbnail',
-               'specialization',
-               'degree',
-               'phone',
-               'address',
-               'locationUrl',
-               'workTimes',
-               'price',
-            ])
-            .limit(3)
-            .sort({ averageRating: -1 })
-            .exec();
+         const topRatedDoctors = await this.ClinicModel.aggregate([
+            {
+               $match: { category: 'CLINIC' },
+            },
+            {
+               $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'clinicId',
+                  as: 'reviews',
+               },
+            },
+            {
+               $addFields: {
+                  averageRating: {
+                     $ifNull: [
+                        {
+                           $avg: '$reviews.rating',
+                        },
+                        0,
+                     ],
+                  },
+               },
+            },
+            {
+               $project: {
+                  doctorName: 1,
+                  thumbnail: 1,
+                  specialization: 1,
+                  degree: 1,
+                  phone: 1,
+                  address: 1,
+                  locationUrl: 1,
+                  workTimes: 1,
+                  price: 1,
+                  averageRating: 1,
+               },
+            },
+            {
+               $sort: { averageRating: -1 },
+            },
+            {
+               $limit: 3,
+            },
+         ]);
 
-         doctors = await Promise.all(
-            doctors.map(async (doctor) => {
-               doctor.averageRating = await doctor.averageRating;
-               return doctor;
-            })
-         );
-         return doctors;
+         return topRatedDoctors;
       } catch (error) {
          console.log(error);
          throw new Error('Failed to get top-rated doctors');
@@ -38,30 +63,55 @@ class HomeService {
 
    async getTopRatedLabs() {
       try {
-         let labs = await this.ClinicModel.find({ category: 'LAB' })
-            .select([
-               'doctorName',
-               'thumbnail',
-               'specialization',
-               'degree',
-               'phone',
-               'address',
-               'locationUrl',
-               'workTimes',
-               'price',
-            ])
-            .limit(3)
-            .sort({ averageRating: -1 })
-            .exec();
-         labs = await Promise.all(
-            labs.map(async (lab) => {
-               lab.averageRating = await lab.averageRating;
-               return lab;
-            })
-         );
+         const topRatedLabs = await this.ClinicModel.aggregate([
+            {
+               $match: { category: 'LAB' },
+            },
+            {
+               $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'clinicId',
+                  as: 'reviews',
+               },
+            },
+            {
+               $addFields: {
+                  averageRating: {
+                     $ifNull: [
+                        {
+                           $avg: '$reviews.rating',
+                        },
+                        0,
+                     ],
+                  },
+               },
+            },
+            {
+               $project: {
+                  doctorName: 1,
+                  thumbnail: 1,
+                  specialization: 1,
+                  degree: 1,
+                  phone: 1,
+                  address: 1,
+                  locationUrl: 1,
+                  workTimes: 1,
+                  price: 1,
+                  averageRating: 1,
+               },
+            },
+            {
+               $sort: { averageRating: -1 },
+            },
+            {
+               $limit: 3,
+            },
+         ]);
 
-         return labs;
+         return topRatedLabs;
       } catch (error) {
+         console.log(error);
          throw new Error('Failed to get top-rated labs');
       }
    }
@@ -79,6 +129,7 @@ class HomeService {
             .exec();
          return latestArticles;
       } catch (error) {
+         console.log(error);
          throw new Error('Failed to get the latest articles');
       }
    }

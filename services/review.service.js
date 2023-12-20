@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Review = require('../models/Review');
+const CustomError = require('../utils/customError');
 class ReviewService {
    constructor(ReviewModel) {
       this.ReviewModel = ReviewModel;
@@ -19,6 +20,11 @@ class ReviewService {
             throw error;
          }
 
+         const isAlreadyReviewed = await this.ReviewModel.findOne({ userId, clinicId });
+         console.log(isAlreadyReviewed);
+         if (isAlreadyReviewed) {
+            throw new CustomError('You already reviewed this clinic/lab', 'conflict');
+         }
          const review = new this.ReviewModel({
             userId,
             clinicId,
@@ -36,12 +42,27 @@ class ReviewService {
    async getReviewsForClinic(clinicId, userId, page = 1, limit = 40) {
       try {
          const offset = (page - 1) * limit;
-         console.log(userId);
 
          const aggregationPipeline = [
             { $match: { clinicId: new mongoose.Types.ObjectId(clinicId) } },
             {
+               $lookup: {
+                  from: 'users',
+                  localField: 'userId',
+                  foreignField: '_id',
+                  as: 'user',
+                  pipeline: [
+                     {
+                        $project: {
+                           fullname: 1,
+                        },
+                     },
+                  ],
+               },
+            },
+            {
                $project: {
+                  user: '$user',
                   comment: 1,
                   rating: 1,
                   reported: 1,
@@ -49,6 +70,8 @@ class ReviewService {
                   notHelpfulCount: { $size: '$notHelpful' },
                   isHelpful: userId ? { $in: [new mongoose.Types.ObjectId(userId), '$helpful'] } : null,
                   isNotHelpful: userId ? { $in: [new mongoose.Types.ObjectId(userId), '$notHelpful'] } : null,
+                  isCurrentUserReview: userId ? { $eq: ['$userId', new mongoose.Types.ObjectId(userId)] } : null,
+                  userName: { $arrayElemAt: ['$user.doctorName', 0] }, // Assuming the user has a 'doctorName' field
                },
             },
             { $skip: offset },
@@ -91,7 +114,7 @@ class ReviewService {
                $project: {
                   clinicId: '$clinic._id',
                   clinicDoctor: '$clinic.doctorName',
-                  clinicCategoryr: '$clinic.category',
+                  clinicCategory: '$clinic.category',
                   comment: 1,
                   rating: 1,
                   reported: 1,

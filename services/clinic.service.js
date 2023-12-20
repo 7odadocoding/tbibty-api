@@ -17,23 +17,52 @@ class ClinicService {
             $and: [{ _id: new mongoose.Types.ObjectId(id) }, category ? { category } : {}],
          };
 
-         const clinic = await Clinic.findOne(query).select([
-            'doctorName',
-            'specialization',
-            'degree',
-            'phone',
-            'address',
-            'locationUrl',
-            'thumbnail',
-            'rating',
-            'workTimes',
-            'price',
+         const clinic = await Clinic.aggregate([
+            {
+               $match: query,
+            },
+            {
+               $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'clinicId',
+                  as: 'reviews',
+               },
+            },
+            {
+               $addFields: {
+                  averageRating: {
+                     $ifNull: [
+                        {
+                           $avg: '$reviews.rating',
+                        },
+                        0,
+                     ],
+                  },
+               },
+            },
+            {
+               $project: {
+                  doctorName: 1,
+                  specialization: 1,
+                  degree: 1,
+                  phone: 1,
+                  address: 1,
+                  locationUrl: 1,
+                  thumbnail: 1,
+                  rating: 1,
+                  workTimes: 1,
+                  price: 1,
+                  averageRating: 1,
+               },
+            },
          ]);
 
-         const populatedClinic = clinic.toObject();
-         populatedClinic.averageRating = await clinic.averageRating;
+         if (clinic.length === 0) {
+            throw new CustomError(category + ' not found', 'notFound');
+         }
 
-         return populatedClinic;
+         return clinic[0];
       } catch (error) {
          console.log(error);
          throw error;
@@ -48,33 +77,58 @@ class ClinicService {
       return await this.findOne(id, 'LAB');
    }
 
-   async getClinics(limit, page, category) {
+   async getClinics(limit = 10, page = 1, category) {
       try {
-         let skip = (page - 1) * limit;
-         let clinics = await Clinic.find(category ? { category } : {})
-            .select([
-               'doctorName',
-               'specialization',
-               'degree',
-               'phone',
-               'address',
-               'locationUrl',
-               'workTimes',
-               'price',
-               'thumbnail',
-               'category',
-            ])
-            .skip(skip)
-            .limit(limit);
+         let skip = (parseInt(page) - 1) * parseInt(limit);
+         console.log(parseInt(limit), page, skip);
+         let clinics = await Clinic.aggregate([
+            {
+               $match: category ? { category } : {},
+            },
+            {
+               $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'clinicId',
+                  as: 'reviews',
+               },
+            },
+            {
+               $addFields: {
+                  averageRating: {
+                     $ifNull: [
+                        {
+                           $avg: '$reviews.rating',
+                        },
+                        0,
+                     ],
+                  },
+               },
+            },
+            {
+               $project: {
+                  doctorName: 1,
+                  specialization: 1,
+                  degree: 1,
+                  phone: 1,
+                  address: 1,
+                  locationUrl: 1,
+                  workTimes: 1,
+                  price: 1,
+                  thumbnail: 1,
+                  category: 1,
+                  averageRating: 1,
+               },
+            },
+            {
+               $skip: skip,
+            },
+            {
+               $limit: parseInt(limit),
+            },
+         ]);
 
-         const populatedClinics = await Promise.all(
-            clinics.map(async (clinic) => {
-               clinic.averageRating = await clinic.averageRating;
-               return clinic;
-            })
-         );
-
-         return populatedClinics;
+         return clinics;
       } catch (error) {
          throw error;
       }
@@ -99,18 +153,47 @@ class ClinicService {
             [searchBy]: { $regex: new RegExp(keyword, 'i') },
             category: { $in: category ? [category] : allowedCategories },
          };
-         let searchResult = await Clinic.find(searchQuery)
-            .select(['doctorName', 'specialization', 'thumbnail', 'category'])
-            .exec();
+
+         let searchResult = await Clinic.aggregate([
+            {
+               $match: searchQuery,
+            },
+            {
+               $lookup: {
+                  from: 'reviews',
+                  localField: '_id',
+                  foreignField: 'clinicId',
+                  as: 'reviews',
+               },
+            },
+            {
+               $addFields: {
+                  averageRating: {
+                     $ifNull: [
+                        {
+                           $avg: '$reviews.rating',
+                        },
+                        0,
+                     ],
+                  },
+               },
+            },
+            {
+               $project: {
+                  doctorName: 1,
+                  specialization: 1,
+                  thumbnail: 1,
+                  category: 1,
+                  averageRating: 1,
+               },
+            },
+         ]);
+
          if (searchResult.length) {
-            searchResult = await Promise.all(
-               searchResult.map(async (clinic) => {
-                  clinic.averageRating = await clinic.averageRating;
-                  return clinic;
-               })
-            );
+            return searchResult;
          }
-         return searchResult;
+
+         return [];
       } catch (error) {
          console.error('Error in searchClinics:', error.message);
          throw error;
@@ -177,14 +260,3 @@ class ClinicService {
 }
 
 module.exports = new ClinicService(Clinic);
-
-/*
-  const filter = data.filter((item) => {
-   const itemTitle = item?.title ? item?.title.toUpperCase() : ''.toUpperCase();
-   const itemContent = item?.content ? item?.content.toUpperCase() : ''.toUpperCase();
-   const itemData = item?.short_description ? item?.short_description.toUpperCase() : ''.toUpperCase();
-   const textData = text.toUpperCase();
-   return itemTitle.indexOf(textData) > -1 || itemContent.indexOf(textData) > -1 || itemData.indexOf(textData) > -1;
-});
-
- */

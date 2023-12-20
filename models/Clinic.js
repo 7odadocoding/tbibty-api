@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Review = require('./Review');
 const { String, Number, Boolean } = mongoose.Schema.Types;
 
 const clinicSchema = new mongoose.Schema(
@@ -53,30 +52,6 @@ const clinicSchema = new mongoose.Schema(
       category: {
          type: String,
          enum: ['CLINIC', 'LAB', 'XRAY'],
-      },
-      averageRating: {
-         type: Number,
-         virtual: true,
-         get: async function () {
-            try {
-               const averageRating = await Review.aggregate([
-                  {
-                     $match: { clinicId: this._id },
-                  },
-                  {
-                     $group: {
-                        _id: null,
-                        averageRating: { $avg: '$rating' },
-                     },
-                  },
-               ]);
-
-               return averageRating.length > 0 ? averageRating[0].averageRating : 0;
-            } catch (error) {
-               console.error('Error calculating average rating:', error);
-               throw error;
-            }
-         },
       },
    },
    { timestamps: true }
