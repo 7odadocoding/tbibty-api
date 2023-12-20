@@ -1,5 +1,6 @@
 const connectDB = require('../configs/db');
 const Article = require('../models/Article');
+const Clinic = require('../models/Clinic');
 
 const medicalArticles = [
    {
@@ -46,8 +47,19 @@ const medicalArticles = [
 
 async function seed() {
    connectDB();
-   const newArticles = await Article.create(medicalArticles);
-   console.log(newArticles);
+   // const newArticles = await Article.create(medicalArticles);
+   // console.log(newArticles);
+   const clinics = await Clinic.find();
+
+   // Iterate through each document and update it
+   for (const clinic of clinics) {
+      // Add the thumbnail field if it doesn't exist
+      if (!clinic.thumbnail) {
+         clinic.thumbnail = 'N/A'; // You can set the default value for thumbnail here
+      }
+      // Save the updated document back to the database
+      await clinic.save();
+   }
 }
 
 seed().then(() => {

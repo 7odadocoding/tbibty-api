@@ -41,7 +41,12 @@ class ReviewService {
    async getReviewsForClinic(clinicId, userId, page = 1, limit = 40) {
       try {
          const offset = (page - 1) * limit;
-
+         if (!mongoose.isValidObjectId(clinicId)) {
+            throw new CustomError(
+               'Invalid ClinicId id passed in must be a string of 12 bytes or a string of 24 hex characters or an integer ',
+               'badRequest'
+            );
+         }
          const aggregationPipeline = [
             { $match: { clinicId: new mongoose.Types.ObjectId(clinicId) } },
             {
@@ -88,8 +93,11 @@ class ReviewService {
          }
 
          const clinicReviews = await this.ReviewModel.aggregate(aggregationPipeline);
-
-         return userId ? clinicReviews[0].results : clinicReviews;
+         const reviews = userId && clinicReviews?.results ? clinicReviews[0].results : clinicReviews;
+         if (!reviews.length) {
+            throw new CustomError('No reviews yet.', 'notFound');
+         }
+         return reviews;
       } catch (error) {
          console.error('Error in getReviewsForClinic:', error.message);
          throw error;

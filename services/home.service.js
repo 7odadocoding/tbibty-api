@@ -90,7 +90,7 @@ class HomeService {
             {
                $project: {
                   doctorName: 1,
-                  thumbnail: 1,
+                  thumbnail: 1 ,
                   specialization: 1,
                   degree: 1,
                   phone: 1,
@@ -119,7 +119,7 @@ class HomeService {
    async getLatestArticles() {
       try {
          const latestArticles = await Article.find()
-            .select('articleTitle author')
+            .select('articleTitle author thumbnail url')
             .populate({
                path: 'author',
                select: 'doctorName',

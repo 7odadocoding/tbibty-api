@@ -38,7 +38,7 @@ const clinicSchema = new mongoose.Schema(
       price: {
          type: Number,
          required: true,
-         default: 'N/A',
+         default: 0,
       },
       isRemoved: {
          type: Boolean,

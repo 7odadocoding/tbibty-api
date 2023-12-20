@@ -198,12 +198,13 @@ class UserService {
             updatedFields.governorate = governorate;
          }
 
-         if (image) {
-            user.image = image;
+         if (image && user.image.public_id !== 'user_images/default') {
             const publicId = user.image.public_id;
-            if (publicId !== 'user_images/default') {
-               await uploadService.destroyImage(publicId);
-            }
+            await uploadService.destroyImage(publicId);
+            user.image = image;
+            updatedFields.image = image;
+         } else if (image) {
+            user.image = image;
             updatedFields.image = image;
          }
 
