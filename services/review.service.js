@@ -21,7 +21,6 @@ class ReviewService {
          }
 
          const isAlreadyReviewed = await this.ReviewModel.findOne({ userId, clinicId });
-         console.log(isAlreadyReviewed);
          if (isAlreadyReviewed) {
             throw new CustomError('You already reviewed this clinic/lab', 'conflict');
          }
