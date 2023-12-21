@@ -198,13 +198,20 @@ class UserService {
             updatedFields.governorate = governorate;
          }
 
-         if (image && user.image.public_id !== 'user_images/default') {
+         if (image) {
             const publicId = user.image.public_id;
-            await uploadService.destroyImage(publicId);
-            user.image = image;
-            updatedFields.image = image;
-         } else if (image) {
-            user.image = image;
+            if (user.image.public_id !== 'user_images/default' && image.secure_url != user.image.secure_url) {
+               console.log('deleted old image');
+               try {
+                  await uploadService.destroyImage(publicId);
+               } catch (error) {
+                  console.error('Error deleting old image', error);
+                  user.image = image;
+               }
+            } else {
+               console.log('same image image');
+               user.image = image;
+            }
             updatedFields.image = image;
          }
 
