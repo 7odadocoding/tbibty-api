@@ -50,7 +50,7 @@ class ReviewController {
          const { reviewId } = req.params;
          const { userId } = req.user;
          await this.service.deleteReview(reviewId, userId);
-         const response = successResponse('Review deleted successfully', 204);
+         const response = successResponse('Review deleted successfully', 200);
          res.status(response.status).json(response);
       } catch (error) {
          console.error('Error in deleteReview:', error.message);

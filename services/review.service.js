@@ -96,7 +96,6 @@ class ReviewService {
          }
 
          const clinicReviews = await this.ReviewModel.aggregate(aggregationPipeline);
-         console.log('CLINIC_REVIEWS', clinicReviews);
          const reviews =
             userId && clinicReviews.length && clinicReviews[0].results ? clinicReviews[0].results : clinicReviews;
          if (!reviews.length) {
@@ -160,8 +159,8 @@ class ReviewService {
             error.name = 'unauthorized';
             throw error;
          }
-
-         await review.remove();
+         console.log(review);
+         await review.deleteOne();
          return {
             message: 'Review deleted successfully',
             deletedReview: review,
