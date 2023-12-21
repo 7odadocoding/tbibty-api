@@ -97,7 +97,7 @@ class ReviewService {
          if (!reviews.length) {
             throw new CustomError('No reviews yet.', 'notFound');
          }
-         return reviews;
+         return reviews.results ? reviews.results : reviews;
       } catch (error) {
          console.error('Error in getReviewsForClinic:', error.message);
          throw error;
@@ -133,7 +133,7 @@ class ReviewService {
             },
          ]);
 
-         return userReviews;
+         return userReviews.results ? userReviews.results : userReviews;
       } catch (error) {
          console.error('Error in getReviewsForUser:', error.message);
          throw error;
