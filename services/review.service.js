@@ -41,7 +41,7 @@ class ReviewService {
    async getReviewsForClinic(clinicId, userId, page = 1, limit = 40) {
       try {
          if (parseInt(page) < 1 || parseInt(limit) < 1) {
-            throw new CustomError('page & limit must be larger than 0' , 'badRequest');
+            throw new CustomError('page & limit must be larger than 0', 'badRequest');
          }
          const offset = (parseInt(page) - 1) * parseInt(limit);
          if (!mongoose.isValidObjectId(clinicId)) {
@@ -96,9 +96,11 @@ class ReviewService {
          }
 
          const clinicReviews = await this.ReviewModel.aggregate(aggregationPipeline);
-         const reviews = userId && clinicReviews[0].results ? clinicReviews[0].results : clinicReviews;
+         console.log('CLINIC_REVIEWS', clinicReviews);
+         const reviews =
+            userId && clinicReviews.length && clinicReviews[0].results ? clinicReviews[0].results : clinicReviews;
          if (!reviews.length) {
-            throw new CustomError('No reviews yet.', 'notFound');
+            return [];
          }
          return reviews;
       } catch (error) {
