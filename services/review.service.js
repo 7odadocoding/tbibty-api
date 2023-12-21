@@ -40,7 +40,10 @@ class ReviewService {
 
    async getReviewsForClinic(clinicId, userId, page = 1, limit = 40) {
       try {
-         const offset = (page - 1) * limit;
+         if (parseInt(page) < 1 || parseInt(limit) < 1) {
+            throw new CustomError('page & limit must be larger than 0' , 'badRequest');
+         }
+         const offset = (parseInt(page) - 1) * parseInt(limit);
          if (!mongoose.isValidObjectId(clinicId)) {
             throw new CustomError(
                'Invalid ClinicId id passed in must be a string of 12 bytes or a string of 24 hex characters or an integer ',
@@ -66,7 +69,7 @@ class ReviewService {
             },
             {
                $project: {
-                  user: '$user',
+                  user: { $arrayElemAt: ['$user', 0] },
                   comment: 1,
                   rating: 1,
                   reported: 1,
@@ -79,7 +82,7 @@ class ReviewService {
                },
             },
             { $skip: offset },
-            { $limit: limit },
+            { $limit: parseInt(limit) },
          ];
 
          if (userId) {
@@ -93,11 +96,11 @@ class ReviewService {
          }
 
          const clinicReviews = await this.ReviewModel.aggregate(aggregationPipeline);
-         const reviews = userId && clinicReviews?.results ? clinicReviews[0].results : clinicReviews;
+         const reviews = userId && clinicReviews[0].results ? clinicReviews[0].results : clinicReviews;
          if (!reviews.length) {
             throw new CustomError('No reviews yet.', 'notFound');
          }
-         return reviews.results ? reviews.results : reviews;
+         return reviews;
       } catch (error) {
          console.error('Error in getReviewsForClinic:', error.message);
          throw error;
