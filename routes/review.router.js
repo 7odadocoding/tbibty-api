@@ -16,7 +16,7 @@ reviewRouter.put(
    reviewController.markAsNotHelpful.bind(reviewController)
 );
 reviewRouter.put('/:reviewId/report', authenticate(true), reviewController.reportReview.bind(reviewController));
-reviewRouter.put('/:reviewId', authenticate(true), reviewController.updateReview.bind(reviewController));
+reviewRouter.put('/', authenticate(true), reviewController.updateReview.bind(reviewController));
 reviewRouter.delete('/:reviewId', authenticate(true), reviewController.deleteReview.bind(reviewController));
 
 module.exports = reviewRouter;
