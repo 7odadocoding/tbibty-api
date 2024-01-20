@@ -9,7 +9,7 @@ DB_NAME="mydatabase"
 
 # Authentication
 JWT_SECRET="yourSecretKey"
-ROUNDS=12
+ROUNDS=10
 
 # Server
 PORT=3000
