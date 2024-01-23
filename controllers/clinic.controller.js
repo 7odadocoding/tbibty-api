@@ -46,6 +46,22 @@ class ClinicController {
       }
    }
 
+   async getExperience(req, res, next) {
+      try {
+         let { id } = req.params;
+         let experience = await this.service.getExperience(id);
+
+         if (!experience) {
+            throw new CustomError('Not Found', 'notFound');
+         }
+
+         let success = successResponse('experience fetched', 200, experience);
+         res.status(success.status).json(success);
+      } catch (error) {
+         next(error);
+      }
+   }
+
    async getClinics(req, res, next) {
       try {
          let { limit, page, category } = req.query;

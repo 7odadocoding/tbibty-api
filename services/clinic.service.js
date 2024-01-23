@@ -77,6 +77,12 @@ class ClinicService {
       return await this.findOne(id, 'LAB');
    }
 
+   async getExperience(id) {
+      const { specialization, degree, doctorName } = await this.findOne(id);
+      console.log(specialization, degree, doctorName);
+      return { specialization, degree, doctorName };
+   }
+
    async getClinics(limit = 10, page = 1, category) {
       try {
          let skip = (parseInt(page) - 1) * parseInt(limit);
